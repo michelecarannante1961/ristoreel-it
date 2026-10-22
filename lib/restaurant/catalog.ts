@@ -22,7 +22,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Scelta dei piatti da eliminare o valorizzare",
     ],
     cover: "/media/ristorazione/piatto.jpg",
-    video: "/media/ristorazione/hero-reel.mp4",
+    video: "/media/ristorazione/ambito-01.mp4",
   },
   {
     id: "food-cost",
@@ -37,7 +37,8 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Prezzo di vendita dei piatti",
       "Identificazione dei piatti più venduti e redditizi",
     ],
-    cover: "/media/ristorazione/cucina.jpg",
+    cover: "/media/ristorazione/ingredienti.jpg",
+    video: "/media/ristorazione/ambito-02.mp4",
   },
   {
     id: "cucina",
@@ -54,6 +55,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Standardizzazione delle ricette",
     ],
     cover: "/media/ristorazione/cucina.jpg",
+    video: "/media/ristorazione/ambito-03.mp4",
   },
   {
     id: "sala",
@@ -69,7 +71,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Gestione dei tempi di servizio",
       "Attenzione e personalizzazione del servizio al tavolo",
     ],
-    cover: "/media/ristorazione/sala.jpg",
+    cover: "/media/ristorazione/ambito-04.jpg",
   },
   {
     id: "prenotazioni",
@@ -86,7 +88,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Politiche di caparra e cancellazione",
       "Tavoli riservati a occasioni speciali",
     ],
-    cover: "/media/ristorazione/sala.jpg",
+    cover: "/media/ristorazione/ambito-05.jpg",
   },
   {
     id: "coperti",
@@ -102,7 +104,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Ricavo per posto a sedere e fascia oraria",
       "Ottimizzazione delle prenotazioni rispetto alla capacità della cucina",
     ],
-    cover: "/media/ristorazione/sala.jpg",
+    cover: "/media/ristorazione/ambito-06.jpg",
   },
   {
     id: "materie-prime",
@@ -118,7 +120,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Tracciabilità e rintracciabilità alimentare",
       "Gestione dei lotti e delle scadenze",
     ],
-    cover: "/media/ristorazione/ingredienti.jpg",
+    cover: "/media/ristorazione/ambito-07.jpg",
   },
   {
     id: "sprechi",
@@ -134,7 +136,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Recupero alimentare nel rispetto della sicurezza",
       "Misurazione degli sprechi per ingrediente e piatto",
     ],
-    cover: "/media/ristorazione/ingredienti.jpg",
+    cover: "/media/ristorazione/ambito-08.jpg",
   },
   {
     id: "sicurezza-alimentare",
@@ -150,7 +152,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Gestione degli alimenti crudi e cotti",
       "Controlli e registrazioni igienico-sanitarie",
     ],
-    cover: "/media/ristorazione/cucina.jpg",
+    cover: "/media/ristorazione/ambito-09.jpg",
   },
   {
     id: "cucina-sala",
@@ -165,7 +167,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Controllo dell'uscita simultanea delle portate",
       "Allineamento tra ritmo della cucina e andamento della sala",
     ],
-    cover: "/media/ristorazione/cucina.jpg",
+    cover: "/media/ristorazione/ambito-10.jpg",
   },
   {
     id: "esperienza-cliente",
@@ -181,7 +183,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Personalizzazione per allergie e preferenze",
       "Gestione delle occasioni speciali",
     ],
-    cover: "/media/ristorazione/piatto.jpg",
+    cover: "/media/ristorazione/ambito-11.jpg",
   },
   {
     id: "vini-bevande",
@@ -197,7 +199,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Consulenza del sommelier",
       "Beverage cost e ricarichi",
     ],
-    cover: "/media/ristorazione/vino.jpg",
+    cover: "/media/ristorazione/ambito-12.jpg",
   },
   {
     id: "personale",
@@ -213,7 +215,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Formazione sul servizio e sulle preparazioni",
       "Pianificazione degli addetti rispetto ai coperti attesi",
     ],
-    cover: "/media/ristorazione/cucina.jpg",
+    cover: "/media/ristorazione/ambito-13.jpg",
   },
   {
     id: "servizi",
@@ -229,7 +231,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Chiusura della cucina",
       "Riassetto tra un servizio e l'altro",
     ],
-    cover: "/media/ristorazione/sala.jpg",
+    cover: "/media/ristorazione/ambito-14.jpg",
   },
   {
     id: "attrezzature",
@@ -245,7 +247,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Percorsi tra cucina e sala",
       "Distribuzione dei tavoli e gestione degli spazi per gli ospiti",
     ],
-    cover: "/media/ristorazione/cucina.jpg",
+    cover: "/media/ristorazione/ambito-15.jpg",
   },
   {
     id: "stagionalita",
@@ -261,7 +263,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Previsioni dei coperti",
       "Preparazione per gruppi e occasioni particolari",
     ],
-    cover: "/media/ristorazione/ingredienti.jpg",
+    cover: "/media/ristorazione/ambito-16.jpg",
   },
   {
     id: "fidelizzazione",
@@ -277,7 +279,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Recupero di esperienze gastronomiche negative",
       "Inviti a serate e menù speciali",
     ],
-    cover: "/media/ristorazione/sala.jpg",
+    cover: "/media/ristorazione/ambito-17.jpg",
   },
   {
     id: "reputazione",
@@ -293,7 +295,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Riconoscimenti culinari",
       "Posizionamento rispetto ad altri ristoranti",
     ],
-    cover: "/media/ristorazione/piatto.jpg",
+    cover: "/media/ristorazione/ambito-18.jpg",
   },
   {
     id: "tecnologie",
@@ -310,7 +312,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Analisi dei coperti, delle portate e dei tempi di servizio",
       "Piattaforme di ordinazione e delivery",
     ],
-    cover: "/media/ristorazione/sala.jpg",
+    cover: "/media/ristorazione/ambito-19.jpg",
   },
   {
     id: "economia",
@@ -328,7 +330,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Incidenza delle commissioni di prenotazione e consegna",
       "Equilibrio tra capacità della sala, produzione della cucina e domanda",
     ],
-    cover: "/media/ristorazione/sala.jpg",
+    cover: "/media/ristorazione/ambito-20.jpg",
   },
 ]
 
