@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# RISTOREEL (ristoreel.it) â€” ATTIVAZIONE IMMEDIATA HTTPS (CERTBOT + ARUBA DNS)
+# RISTOREEL (ristoreel.it) â€” ATTIVAZIONE HTTPS CON RETRY SUI 4 NAMESERVER ARUBA
 # ==============================================================================
 set -euo pipefail
 
@@ -13,7 +13,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 echo "=================================================================="
-echo "  ATTIVAZIONE IMMEDIATA HTTPS SU $DOMAIN E www.$DOMAIN"
+echo "  ATTIVAZIONE HTTPS SU $DOMAIN E www.$DOMAIN"
 echo "=================================================================="
 
 if [ -d "$APP_DIR/.git" ]; then
@@ -22,8 +22,16 @@ if [ -d "$APP_DIR/.git" ]; then
   git reset --hard origin/main
 fi
 
-echo "Richiesta certificato SSL Let's Encrypt per $DOMAIN e www.$DOMAIN..."
-certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --register-unsafely-without-email --redirect
+# Riprova automaticamente se il 2Â° nameserver di Aruba (dns2.technorail.com) sta ancora sincronizzando
+for attempt in $(seq 1 30); do
+  echo "[Tentativo $attempt/30] Richiesta certificato SSL Let's Encrypt per $DOMAIN e www.$DOMAIN..."
+  if certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --register-unsafely-without-email --redirect; then
+    echo "Certificato SSL Let's Encrypt emesso e attivato con successo!"
+    break
+  fi
+  echo "Uno dei 4 nameserver secondari di Aruba (dns2.technorail.com) sta ultimando l'aggiornamento... riprovo tra 20 secondi."
+  sleep 20
+done
 
 if [ -f "$APP_DIR/.env.local" ]; then
   sed -i "s|http://$DOMAIN|https://$DOMAIN|g" "$APP_DIR/.env.local"
