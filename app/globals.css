@@ -4,6 +4,7 @@
 @import "../styles/quanta/index.css";
 @import "../styles/theme.css";
 @import "../styles/studio/prompt-box.css";
+@import "../styles/restaurant.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -50,7 +51,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
   /* Vireo surface steps (docs/ui-inventory.md §2.1): page → panel → card → raised → hover. */
-  --color-page: #0f1113;
+  --color-page: #171615;
   --color-panel: var(--hf-color-background-primary);
   --color-surface: var(--hf-color-background-secondary);
   --color-raised: var(--hf-color-cool-250);
@@ -105,7 +106,7 @@
     cursor: not-allowed;
   }
   .btn-keycap-generate {
-    background-image: radial-gradient(#effe17 40%, #d1fe17 100%);
+    background-image: linear-gradient(135deg, #f2b995, #df976b);
   }
   .btn-keycap-white {
     background-color: #ffffff;

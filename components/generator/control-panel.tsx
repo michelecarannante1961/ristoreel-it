@@ -23,17 +23,18 @@ import { Badge, ModelIcon, ModelPicker } from "./model-picker"
 import { MediaZone } from "./media-zone"
 import { SettingsRow } from "./setting-tiles"
 import type { Generator } from "./use-generator"
+import { RestaurantBriefCard } from "./restaurant-brief"
 
 export const TAB_LABEL: Record<
   "image" | "video" | "audio",
   Record<GeneratorTab, string>
 > = {
   video: {
-    create: "Create Video",
-    edit: "Edit Video",
-    motion: "Motion Control",
+    create: "Crea video",
+    edit: "Modifica",
+    motion: "Movimento",
   },
-  image: { create: "Create", edit: "Edit", motion: "Motion" },
+  image: { create: "Crea", edit: "Modifica", motion: "Movimento" },
   audio: { create: "Create Audio", edit: "Edit Audio", motion: "Voice" },
 }
 
@@ -60,7 +61,7 @@ export function ModelCard({ generator }: { generator: Generator }) {
       <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
       <div className="absolute right-3 bottom-3 left-3">
         <p className="font-display text-xl text-lime">
-          {preset ? preset.title : (model.category ?? "GENERAL")}
+          {preset ? preset.title : "RISTORAZIONE"}
         </p>
         <p className="mt-1 flex items-center gap-1.5 text-xs text-white/70">
           <ModelIcon model={model} className="size-3" /> {model.label}
@@ -75,18 +76,18 @@ export function ModelCard({ generator }: { generator: Generator }) {
             type="button"
             className="absolute top-2 right-2 flex h-6 items-center gap-1 rounded-lg border border-white/5 bg-[#1b1b1b]/40 px-2 text-xs text-white backdrop-blur-md hover:bg-[#1b1b1b]/70"
           >
-            <Pencil className="size-3" /> Change
+            <Pencil className="size-3" /> Cambia
           </button>
         }
       />
       {preset ? (
         <button
           type="button"
-          aria-label="Remove effect"
+          aria-label="Rimuovi effetto"
           onClick={generator.clearPreset}
           className="absolute top-2 left-2 flex h-6 items-center gap-1 rounded-lg bg-black/40 px-2 text-xs text-white backdrop-blur-md"
         >
-          Effect <X className="size-3" />
+          Effetto <X className="size-3" />
         </button>
       ) : null}
     </div>
@@ -94,9 +95,10 @@ export function ModelCard({ generator }: { generator: Generator }) {
 }
 
 const PLACEHOLDER: Record<GeneratorTab, string> = {
-  create: "Describe the scene you imagine — subject, action, camera, light…",
-  edit: "Describe the change — e.g. “make it snow”, “swap the jacket for red leather”…",
-  motion: "Optional: describe the scene or style for the result…",
+  create:
+    "Es. Lo chef impiatta il nostro risotto ai funghi: dettaglio del riso, vapore e servizio al tavolo, luce calda.",
+  edit: "Descrivi la modifica al video del ristorante: luce, presentazione del piatto, ambiente…",
+  motion: "Descrivi i gesti dello chef o il movimento di camera desiderato…",
 }
 
 export function PromptCard({ generator }: { generator: Generator }) {
@@ -121,8 +123,8 @@ export function PromptCard({ generator }: { generator: Generator }) {
         htmlFor={`prompt-${generator.surface}`}
         className="text-sm text-muted-foreground"
       >
-        {preset ? "Your subject" : "Prompt"}
-        {model.requirePrompt ? "" : preset ? "" : " (optional)"}
+        {preset ? "Il tuo soggetto" : "Descrivi la scena"}
+        {model.requirePrompt ? "" : preset ? "" : " (facoltativo)"}
       </label>
       <textarea
         id={`prompt-${generator.surface}`}
@@ -141,7 +143,7 @@ export function PromptCard({ generator }: { generator: Generator }) {
         rows={4}
         placeholder={
           preset
-            ? `e.g. “a fox in a red scarf” — ${preset.title} adds the look`
+            ? `es. “il nostro piatto del giorno” — ${preset.title} aggiunge lo stile`
             : PLACEHOLDER[generator.tab]
         }
         className="min-h-24 resize-none bg-transparent text-sm leading-5 text-foreground outline-none placeholder:text-muted-foreground"
@@ -218,7 +220,7 @@ export function ModelRow({ generator }: { generator: Generator }) {
           className="flex h-12 shrink-0 items-center gap-3 rounded-xl bg-surface px-3 text-left transition-colors hover:bg-raised"
         >
           <span className="min-w-0 flex-1">
-            <span className="block text-xs text-muted-foreground">Model</span>
+            <span className="block text-xs text-muted-foreground">Modello</span>
             <span className="flex items-center gap-1.5 text-sm text-foreground">
               <ModelIcon model={model} className="size-3.5" />
               <span className="truncate">{model.label}</span>
@@ -259,17 +261,31 @@ export function GenerateButton({
         className="btn-keycap btn-keycap-generate flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold text-[#14151a]"
       >
         {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
-        Generate
+        Genera
         {quote ? (
           <span className="flex items-center gap-1 font-mono">
             <Sparkle className="size-4 fill-current" aria-hidden />
-            <span aria-label={`${quote.credits} credits`}>{quote.credits}</span>
+            <span aria-label={`${quote.credits} crediti`}>{quote.credits}</span>
             {quote.provisional ? (
               <span className="text-xs opacity-60">max</span>
             ) : null}
           </span>
         ) : null}
       </button>
+      {generator.euroQuote ? (
+        <p className="text-center text-xs text-muted-foreground">
+          ≈{" "}
+          {new Intl.NumberFormat("it-IT", {
+            style: "currency",
+            currency: "EUR",
+          }).format(generator.euroQuote.amount)}{" "}
+          · cambio BCE {generator.euroQuote.date}
+          <br />
+          <span className="text-[10px]">
+            Conversione indicativa. Il preventivo è espresso in crediti.
+          </span>
+        </p>
+      ) : null}
       {blocked && disabledReason ? (
         <p
           id={`generate-reason-${generator.surface}`}
@@ -288,14 +304,14 @@ export function ControlPanel({ generator }: { generator: Generator }) {
   if (!model) return null
   return (
     <aside
-      aria-label="Generation settings"
+      aria-label="Impostazioni di generazione"
       className="flex w-full shrink-0 flex-col overflow-hidden rounded-[20px] border border-hairline bg-panel md:w-[320px]"
     >
       {tabs.length > 1 ? (
         <div
           className="flex shrink-0 gap-4 border-b border-white/5 px-4"
           role="tablist"
-          aria-label="Mode"
+          aria-label="Modalità"
         >
           {tabs.map((value) => (
             <button
@@ -317,6 +333,7 @@ export function ControlPanel({ generator }: { generator: Generator }) {
         </div>
       ) : null}
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-2 pb-4">
+        <RestaurantBriefCard generator={generator} />
         <ModelCard generator={generator} />
         <MediaZone generator={generator} />
         <PromptCard generator={generator} />
@@ -334,7 +351,7 @@ export function ControlPanel({ generator }: { generator: Generator }) {
             <span className="flex-1">{generator.error}</span>
             <button
               type="button"
-              aria-label="Dismiss error"
+              aria-label="Chiudi errore"
               onClick={generator.clearError}
             >
               <X className="size-3.5" />

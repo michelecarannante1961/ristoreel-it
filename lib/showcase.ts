@@ -5,56 +5,53 @@
  */
 export const SHOWCASE = [
   {
-    src: "/media/showcase/astronaut.jpg",
+    src: "/media/ristorazione/piatto.jpg",
     chip: "Soul 2",
-    title: "Frames with feeling",
-    caption: "Portraits and stills with real skin, light and grain.",
+    title: "Ogni piatto, una storia",
+    caption: "Ingredienti, consistenze e luce per raccontare la tua cucina.",
   },
   {
-    src: "/media/showcase/dancer.jpg",
+    src: "/media/ristorazione/cucina.jpg",
     chip: "Seedance 2.5",
-    title: "Motion that holds up",
-    caption: "Up to 30-second shots from text, frames or references.",
+    title: "Le persone del tuo ristorante",
+    caption: "Gesti, preparazioni e servizio diventano una storia.",
   },
   {
-    src: "/media/showcase/motorcycle.jpg",
+    src: "/media/ristorazione/sala.jpg",
     chip: "Kling 3.0",
-    title: "Every model, one balance",
-    caption: "Switch between 45+ image and video models in one studio.",
+    title: "Uno studio per il tuo locale",
+    caption: "Scegli il modello adatto alla scena e verifica il preventivo.",
   },
   {
-    src: "/media/showcase/koi.jpg",
+    src: "/media/ristorazione/vino.jpg",
     chip: "Effects",
-    title: "Start from a look",
-    caption: "Presets turn one idea into a finished style in a click.",
+    title: "La tua prossima idea",
+    caption: "Parti da uno dei 20 percorsi dedicati alla ristorazione.",
   },
 ] as const
 
 /** Cover image per model family (picker cards and the model card). */
 export const FAMILY_COVERS: Record<string, string> = {
-  Seedance: "/media/models/seedance.jpg",
-  Kling: "/media/models/kling.jpg",
-  Wan: "/media/models/wan.jpg",
-  "Cinema Studio": "/media/models/cinema-studio.jpg",
-  MiniMax: "/media/models/minimax.jpg",
-  "Happy Horse": "/media/models/happy-horse.jpg",
-  LTX: "/media/models/ltx.jpg",
-  PixVerse: "/media/models/pixverse.jpg",
-  Grok: "/media/models/grok.jpg",
-  Genjutsu: "/media/showcase/dancer.jpg",
-  Soul: "/media/models/soul.jpg",
-  "Marketing Studio": "/media/models/marketing-studio.jpg",
-  Recraft: "/media/models/recraft.jpg",
-  Qwen: "/media/models/qwen.jpg",
-  Ideogram: "/media/models/ideogram.jpg",
-  "Z-Image": "/media/models/z-image.jpg",
+  Seedance: "/media/ristorazione/piatto.jpg",
+  Kling: "/media/ristorazione/piatto.jpg",
+  Wan: "/media/ristorazione/piatto.jpg",
+  "Cinema Studio": "/media/ristorazione/piatto.jpg",
+  MiniMax: "/media/ristorazione/piatto.jpg",
+  "Happy Horse": "/media/ristorazione/piatto.jpg",
+  LTX: "/media/ristorazione/piatto.jpg",
+  PixVerse: "/media/ristorazione/piatto.jpg",
+  Grok: "/media/ristorazione/piatto.jpg",
+  Genjutsu: "/media/ristorazione/cucina.jpg",
+  Soul: "/media/ristorazione/piatto.jpg",
+  "Marketing Studio": "/media/ristorazione/piatto.jpg",
+  Recraft: "/media/ristorazione/piatto.jpg",
+  Qwen: "/media/ristorazione/piatto.jpg",
+  Ideogram: "/media/ristorazione/piatto.jpg",
+  "Z-Image": "/media/ristorazione/piatto.jpg",
 }
 
 /** Looping preview videos for model cards (falls back to the cover image). */
-export const FAMILY_LOOPS: Record<string, string> = {
-  Seedance: "/media/loops/seedance.mp4",
-  Kling: "/media/loops/kling.mp4",
-}
+export const FAMILY_LOOPS: Record<string, string> = {}
 
 export function familyCover(
   family: string,
@@ -63,8 +60,8 @@ export function familyCover(
   return (
     FAMILY_COVERS[family] ??
     (surface === "image"
-      ? "/media/models/soul.jpg"
-      : "/media/models/seedance.jpg")
+      ? "/media/ristorazione/piatto.jpg"
+      : "/media/ristorazione/piatto.jpg")
   )
 }
 
@@ -78,53 +75,53 @@ export const HERO = {
 export const STEPS = {
   video: [
     {
-      title: "Add image",
-      body: "Upload or generate an image to set the first frame.",
-      image: "/media/steps/add.jpg",
+      title: "Aggiungi i tuoi materiali",
+      body: "Carica una foto reale del piatto, della cucina o del locale.",
+      image: "/media/ristorazione/ingredienti.jpg",
     },
     {
-      title: "Choose preset",
-      body: "Pick a camera move or style, or write your own direction.",
-      image: "/media/steps/preset.jpg",
+      title: "Scegli la tua regia",
+      body: "Scegli modello, formato e movimento della camera.",
+      image: "/media/ristorazione/cucina.jpg",
     },
     {
-      title: "Get video",
-      body: "Press Generate and your clip lands in History.",
-      image: "/media/steps/result.jpg",
+      title: "Controlla e genera",
+      body: "Verifica il preventivo: la clip sarà disponibile tra i tuoi video.",
+      image: "/media/ristorazione/piatto.jpg",
     },
   ],
   image: [
     {
-      title: "Describe it",
-      body: "Write the scene, subject and mood you have in mind.",
-      image: "/media/steps/preset.jpg",
+      title: "Descrivi la scena",
+      body: "Racconta il piatto, l’atmosfera e l’inquadratura desiderata.",
+      image: "/media/ristorazione/cucina.jpg",
     },
     {
-      title: "Pick a model",
-      body: "Soul for people, Recraft for design, Ideogram for text.",
-      image: "/media/steps/add.jpg",
+      title: "Scegli il modello",
+      body: "Crea i fotogrammi di riferimento per il video del ristorante.",
+      image: "/media/ristorazione/ingredienti.jpg",
     },
     {
-      title: "Get images",
-      body: "Generate, then reuse the best one as a video start frame.",
-      image: "/media/steps/result.jpg",
+      title: "Ritrova i tuoi fotogrammi",
+      body: "Usa il risultato come primo fotogramma del tuo video.",
+      image: "/media/ristorazione/piatto.jpg",
     },
   ],
   audio: [
     {
       title: "Write a prompt",
       body: "Describe the sound, voice or music you want.",
-      image: "/media/steps/preset.jpg",
+      image: "/media/ristorazione/cucina.jpg",
     },
     {
       title: "Add a reference",
       body: "Optionally attach audio to steer the result.",
-      image: "/media/steps/add.jpg",
+      image: "/media/ristorazione/ingredienti.jpg",
     },
     {
       title: "Get audio",
       body: "Listen, download or use it in a video.",
-      image: "/media/steps/result.jpg",
+      image: "/media/ristorazione/piatto.jpg",
     },
   ],
 } as const

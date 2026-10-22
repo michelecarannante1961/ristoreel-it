@@ -1,6 +1,7 @@
 import "server-only"
 
 import { z } from "zod"
+import { RESTAURANT_MARKUP } from "@/lib/restaurant/policy"
 
 /**
  * Server environment, validated once with zod. Production requires every
@@ -29,8 +30,8 @@ const schema = z.object({
 
   AUTH_SECRET: optionalString,
   AUTH_RESEND_KEY: optionalString,
-  EMAIL_FROM: z.string().default("Vireo <login@vireo.studio>"),
-  SUPPORT_EMAIL: z.email().default("support@vireo.studio"),
+  EMAIL_FROM: z.string().default("RistoReel <login@ristoreel.it>"),
+  SUPPORT_EMAIL: z.email().default("support@ristoreel.it"),
   SIGNUP_BONUS_CREDITS: z.coerce.number().int().min(0).default(0),
   /** Comma-separated emails that get the admin role. */
   ADMIN_EMAILS: z
@@ -45,7 +46,7 @@ const schema = z.object({
   BLOCK_DISPOSABLE_EMAIL: bool(true),
 
   MONGODB_URI: optionalString,
-  MONGODB_DB: z.string().default("vireo-studio"),
+  MONGODB_DB: z.string().default("ristoreel-studio"),
 
   HF_API_BASE_URL: z.url().default("https://api.higgsfield.ai"),
   HF_CREDENTIALS: optionalString.refine(
@@ -57,7 +58,8 @@ const schema = z.object({
   HF_PRICE_GUARD: bool(true),
 
   CREDIT_USD_VALUE: z.coerce.number().positive().default(0.01),
-  CREDIT_MARKUP: z.coerce.number().min(1).default(2),
+  CREDIT_MARKUP: z.coerce.number().min(1).default(RESTAURANT_MARKUP),
+  RESTAURANT_MODE: bool(true),
   RUN_TIMEOUT_MINUTES: z.coerce.number().int().min(5).default(30),
 
   STRIPE_SECRET_KEY: optionalString,
@@ -118,6 +120,10 @@ export function env(): Env {
   }
   const value = parsed.data
   if (value.NODE_ENV === "production" && !isBuildPhase()) {
+    if (value.RESTAURANT_MODE && !value.HF_PRICE_GUARD)
+      throw new EnvError(
+        "RistoReel richiede HF_PRICE_GUARD=true per verificare i costi prima degli addebiti."
+      )
     const missing = REQUIRED_IN_PRODUCTION.filter((key) => !value[key])
     if (missing.length)
       throw new EnvError(

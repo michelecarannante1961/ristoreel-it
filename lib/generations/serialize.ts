@@ -10,7 +10,8 @@ export function toGenerationView(doc: GenerationDoc): GenerationView {
     surface: doc.surface,
     modelId: doc.modelId,
     modelLabel: doc.modelLabel,
-    prompt: doc.prompt,
+    prompt: doc.sourcePrompt ?? doc.prompt,
+    ...(doc.restaurant ? { restaurant: doc.restaurant } : {}),
     settings: doc.settings,
     media: doc.media.map(({ role, kind, url, name }) => ({
       role,

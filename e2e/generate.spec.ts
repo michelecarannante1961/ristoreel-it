@@ -9,7 +9,7 @@ async function generateImage(page: Page, prompt: string) {
   await dismissCookies(page)
   const field = page.getByRole("textbox", { name: /Describe the scene/ })
   await field.fill(prompt)
-  await page.getByRole("button", { name: /^Generate/ }).click()
+  await page.getByRole("button", { name: /^Genera/ }).click()
 }
 
 test("generate an image from a prompt: debit, generating tile, finished tile", async ({
@@ -17,23 +17,26 @@ test("generate an image from a prompt: debit, generating tile, finished tile", a
 }) => {
   await signIn(page, uniqueEmail("image"), "/image")
   const before = await balance(page)
-  await generateImage(page, "A lighthouse on a rocky island at dusk")
+  await generateImage(
+    page,
+    "Un piatto di risotto ai funghi sul tavolo del ristorante"
+  )
   await expect(
     page.getByRole("status").filter({ hasText: /Queued|Starting|Generating/ })
   ).toBeVisible()
   await expect.poll(() => balance(page)).toBeLessThan(before)
   const tile = page.getByRole("button", {
-    name: /Open generation: A lighthouse/,
+    name: /Open generation: Un piatto di risotto/,
   })
   await expect(tile).toBeVisible({ timeout: 45_000 })
   // The finished output survives a refresh (it's in the database, served from our storage).
   await page.reload()
   await expect(
-    page.getByRole("button", { name: /Open generation: A lighthouse/ })
+    page.getByRole("button", { name: /Open generation: Un piatto di risotto/ })
   ).toBeVisible()
   await tile.first().click()
   await expect(page.getByRole("dialog")).toContainText(
-    "A lighthouse on a rocky island at dusk"
+    "Un piatto di risotto ai funghi sul tavolo del ristorante"
   )
 })
 
@@ -78,21 +81,33 @@ test("cancel a queued run on the platform and get the credits back", async ({
 test("not enough credits opens the upgrade modal", async ({ page }) => {
   await signIn(page, uniqueEmail("broke"), "/video")
   await dismissCookies(page)
-  await page.getByRole("button", { name: "Change" }).first().click()
+  await page.getByRole("button", { name: "Cambia" }).first().click()
   await page.getByRole("textbox", { name: "Search models" }).fill("4K")
   await page
     .getByRole("button", { name: /Kling 3\.0 4K/ })
     .first()
     .click()
   await page
-    .getByRole("textbox", { name: /Prompt|Describe/ })
+    .getByRole("textbox", { name: /Prompt|Describe|Descrivi/ })
     .first()
-    .fill("A drone shot over a glacier")
+    .fill("Una panoramica della sala del ristorante")
+  await page.getByRole("button", { name: /^(Duration|Durata):/ }).click()
+  await page.getByRole("slider").first().press("End")
+  await page.keyboard.press("Escape")
+  const quoted = Number(
+    (
+      await page
+        .getByRole("button", { name: /^Genera/ })
+        .first()
+        .innerText()
+    ).match(/\d+/)?.[0]
+  )
+  expect(quoted).toBeGreaterThan(await balance(page))
   await page
-    .getByRole("button", { name: /^Generate/ })
+    .getByRole("button", { name: /^Genera/ })
     .first()
     .click()
   await expect(
-    page.getByRole("dialog", { name: /Get more credits|Upgrade your plan/ })
+    page.getByRole("dialog", { name: /I tuoi crediti/ })
   ).toBeVisible()
 })

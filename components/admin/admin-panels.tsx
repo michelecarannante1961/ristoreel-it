@@ -864,7 +864,7 @@ export function AdminPresets({
                       type="checkbox"
                       checked={form.active}
                       onChange={(event) => set("active", event.target.checked)}
-                      className="accent-[#d1fe17]"
+                      className="accent-[#e8a276]"
                     />
                     Visible in the gallery
                   </label>

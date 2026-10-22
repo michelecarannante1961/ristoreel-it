@@ -89,11 +89,11 @@ export function magicLinkText({
 }
 
 MagicLinkEmail.PreviewProps = {
-  url: "https://vireo.studio/api/auth/callback/resend?token=preview",
-  brand: "Vireo",
-  host: "vireo.studio",
+  url: "https://ristoreel.it/api/auth/callback/resend?token=preview",
+  brand: "RistoReel",
+  host: "ristoreel.it",
   expiresInMinutes: 60,
-  supportEmail: "support@vireo.studio",
+  supportEmail: "support@ristoreel.it",
 } satisfies MagicLinkEmailProps
 
 export default MagicLinkEmail

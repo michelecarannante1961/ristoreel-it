@@ -1,9 +1,9 @@
 import type { Surface } from "@/generation/catalog/types"
 
 /**
- * Plans and top-up packs. Prices are SUGGESTED defaults pending the owner's
- * final numbers (see docs/decisions.md → Plans); Stripe price IDs come from env.
- * Retail value of one credit is CREDIT_USD_VALUE (default $0.01).
+ * RistoVideo subscription plans and credit top-up packs in EUR (€).
+ * Stripe price IDs come from env.
+ * Nominal credit value is CREDIT_USD_VALUE (default 0.01) with 1.5x retail markup on API cost.
  */
 
 export type PlanId = "free" | "starter" | "plus" | "ultra"
@@ -16,12 +16,12 @@ export interface Plan {
   tagline: string
   /** Credits granted each month (subscription bucket is reset to this). */
   monthlyCredits: number
-  /** USD per month when billed monthly / per month when billed annually. */
+  /** EUR per month when billed monthly / per month when billed annually. */
   priceMonthly: number
   priceAnnualPerMonth: number
   /** Parallel generations per surface. */
   concurrency: Record<Surface, number>
-  /** Top-up credits per dollar multiplier (higher plans get more). */
+  /** Top-up credits multiplier (higher plans get bonus credits on top-ups). */
   topupMultiplier: number
   badge?: "MOST POPULAR" | "BEST VALUE"
   features: { label: string; included: boolean; tag?: string }[]
@@ -31,36 +31,37 @@ export interface Plan {
 export const PLANS: Record<PlanId, Plan> = {
   free: {
     id: "free",
-    name: "Free",
-    tagline: "Try every model with your sign-up credits",
+    name: "Degustazione",
+    tagline:
+      "Copioni e storyboard gratuiti + crediti di benvenuto per provare i modelli AI",
     monthlyCredits: 0,
     priceMonthly: 0,
     priceAnnualPerMonth: 0,
     concurrency: { image: 1, video: 1, audio: 1 },
     topupMultiplier: 1,
     features: [
-      { label: "Every image and video model", included: true },
-      { label: "Personal library and projects", included: true },
-      { label: "Publish to Community", included: true },
-      { label: "Parallel generations", included: false },
-      { label: "Commercial use", included: false },
+      { label: "Generatore Copione & Storyboard 3 scene (0 crediti)", included: true },
+      { label: "Tutti i 20 ambiti e 161 argomenti ristorazione", included: true },
+      { label: "Brand Kit del locale e libreria personale", included: true },
+      { label: "Generazioni video AI parallele", included: false },
+      { label: "Licenza commerciale completa", included: false },
     ],
   },
   starter: {
     id: "starter",
-    name: "Starter",
-    tagline: "For creators getting started",
+    name: "Trattoria",
+    tagline: "Per singoli locali che pubblicano reel e formano lo staff ogni settimana",
     monthlyCredits: 1_000,
     priceMonthly: 12,
     priceAnnualPerMonth: 9.6,
     concurrency: { image: 4, video: 2, audio: 2 },
     topupMultiplier: 1.05,
     features: [
-      { label: "1,000 credits every month", included: true },
-      { label: "2 video + 4 image generations at once", included: true },
-      { label: "Commercial use", included: true },
-      { label: "5% bonus on credit top-ups", included: true },
-      { label: "Priority queue", included: false },
+      { label: "1.000 crediti ogni mese + Copioni illimitati gratis", included: true },
+      { label: "2 video + 4 immagini AI in contemporanea", included: true },
+      { label: "Brand Kit salvato (logo, stile, piatti, offerta)", included: true },
+      { label: "Uso commerciale per social e sito del locale", included: true },
+      { label: "+5% di crediti bonus sulle ricariche a consumo", included: true },
     ],
     stripePriceEnv: {
       month: "STRIPE_PRICE_STARTER_MONTHLY",
@@ -69,8 +70,8 @@ export const PLANS: Record<PlanId, Plan> = {
   },
   plus: {
     id: "plus",
-    name: "Plus",
-    tagline: "For daily creators and small teams",
+    name: "Ristorante",
+    tagline: "Per ristoranti strutturati: promozione menù, formazione brigata e gestione",
     monthlyCredits: 3_500,
     priceMonthly: 35,
     priceAnnualPerMonth: 28,
@@ -78,11 +79,11 @@ export const PLANS: Record<PlanId, Plan> = {
     topupMultiplier: 1.1,
     badge: "MOST POPULAR",
     features: [
-      { label: "3,500 credits every month", included: true },
-      { label: "6 video + 8 image generations at once", included: true },
-      { label: "Commercial use", included: true },
-      { label: "10% bonus on credit top-ups", included: true, tag: "BONUS" },
-      { label: "Priority queue", included: true },
+      { label: "3.500 crediti ogni mese + Copioni illimitati gratis", included: true },
+      { label: "6 video + 8 immagini AI in contemporanea", included: true },
+      { label: "Uso commerciale completo e coda prioritaria", included: true },
+      { label: "+10% di crediti bonus sulle ricariche a consumo", included: true, tag: "BONUS" },
+      { label: "Procedure formative e briefing per cucina e sala", included: true },
     ],
     stripePriceEnv: {
       month: "STRIPE_PRICE_PLUS_MONTHLY",
@@ -91,8 +92,8 @@ export const PLANS: Record<PlanId, Plan> = {
   },
   ultra: {
     id: "ultra",
-    name: "Ultra",
-    tagline: "For studios shipping every day",
+    name: "Gruppo & Agenzia",
+    tagline: "Per catene di ristorazione, franchising e agenzie di marketing food",
     monthlyCredits: 9_000,
     priceMonthly: 89,
     priceAnnualPerMonth: 71.2,
@@ -100,11 +101,11 @@ export const PLANS: Record<PlanId, Plan> = {
     topupMultiplier: 1.2,
     badge: "BEST VALUE",
     features: [
-      { label: "9,000 credits every month", included: true },
-      { label: "8 video + 12 image generations at once", included: true },
-      { label: "Commercial use", included: true },
-      { label: "20% bonus on credit top-ups", included: true, tag: "BONUS" },
-      { label: "Priority queue", included: true },
+      { label: "9.000 crediti ogni mese + Copioni illimitati gratis", included: true },
+      { label: "8 video + 12 immagini AI in contemporanea", included: true },
+      { label: "Uso commerciale multi-locale e coda prioritaria", included: true },
+      { label: "+20% di crediti bonus sulle ricariche a consumo", included: true, tag: "BONUS" },
+      { label: "Massima capacità per campagne stagionali e menù", included: true },
     ],
     stripePriceEnv: {
       month: "STRIPE_PRICE_ULTRA_MONTHLY",
@@ -126,22 +127,22 @@ export interface TopupPack {
 export const TOPUPS: Record<TopupId, TopupPack> = {
   small: {
     id: "small",
-    name: "Boost",
+    name: "Ricarica Servizio",
     credits: 500,
     price: 5,
     stripePriceEnv: "STRIPE_PRICE_TOPUP_SMALL",
   },
   medium: {
     id: "medium",
-    name: "Pack",
-    credits: 2_200,
+    name: "Ricarica Menù",
+    credits: 2_000,
     price: 20,
     stripePriceEnv: "STRIPE_PRICE_TOPUP_MEDIUM",
   },
   large: {
     id: "large",
-    name: "Crate",
-    credits: 6_000,
+    name: "Ricarica Stagione",
+    credits: 5_000,
     price: 50,
     stripePriceEnv: "STRIPE_PRICE_TOPUP_LARGE",
   },

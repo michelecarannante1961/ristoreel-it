@@ -5,6 +5,7 @@ import { Fragment, useState } from "react"
 import { Check, ChevronDown, Loader2, X } from "lucide-react"
 
 import {
+  formatEuro,
   IntervalToggle,
   PlanGrid,
   TopupGrid,
@@ -22,13 +23,11 @@ import { cn } from "@/lib/utils"
 
 const ORDER: PlanId[] = ["free", "starter", "plus", "ultra"]
 
-function money(value: number): string {
-  return value % 1 === 0 ? `$${value}` : `$${value.toFixed(2)}`
-}
-
-function hasFeature(plan: Plan, label: string): boolean {
+function hasFeature(plan: Plan, keyword: string): boolean {
   return plan.features.some(
-    (feature) => feature.label === label && feature.included
+    (feature) =>
+      feature.label.toLowerCase().includes(keyword.toLowerCase()) &&
+      feature.included
   )
 }
 
@@ -40,34 +39,39 @@ function rowGroups(): { title: string; rows: Row[] }[] {
   const surfaces = activeSurfaces()
   const parallel: Row[] = [
     {
-      label: "Parallel video generations",
+      label: "Generazioni video AI in parallelo",
       values: (plan) => String(plan.concurrency.video),
     },
     {
-      label: "Parallel image generations",
+      label: "Generazioni immagini AI in parallelo",
       values: (plan) => String(plan.concurrency.image),
     },
   ]
   if (surfaces.includes("audio"))
     parallel.push({
-      label: "Parallel audio generations",
+      label: "Generazioni audio in parallelo",
       values: (plan) => String(plan.concurrency.audio),
     })
   return [
     {
-      title: "Credits",
+      title: "Crediti e Copioni",
       rows: [
         {
-          label: "Monthly credits",
-          hint: "Refilled at every renewal",
-          values: (plan) =>
-            plan.monthlyCredits
-              ? plan.monthlyCredits.toLocaleString("en-US")
-              : (["Top-ups only", "—"] as const),
+          label: "Copioni & Storyboard 3 scene",
+          hint: "Su tutti i 20 ambiti della ristorazione",
+          values: () => "Gratis (0 crediti)",
         },
         {
-          label: "Top-up bonus",
-          hint: "Extra credits on every pack",
+          label: "Crediti mensili inclusi",
+          hint: "Ricaricati a ogni rinnovo mensile",
+          values: (plan) =>
+            plan.monthlyCredits
+              ? plan.monthlyCredits.toLocaleString("it-IT")
+              : (["Solo ricariche", "—"] as const),
+        },
+        {
+          label: "Bonus sulle ricariche a consumo",
+          hint: "Crediti extra su ogni pacchetto",
           values: (plan) =>
             plan.topupMultiplier > 1
               ? `+${Math.round((plan.topupMultiplier - 1) * 100)}%`
@@ -76,25 +80,27 @@ function rowGroups(): { title: string; rows: Row[] }[] {
       ],
     },
     {
-      title: "Generation",
+      title: "Produzione AI",
       rows: [
         ...parallel,
-        { label: "Every image and video model", values: () => true },
+        { label: "Tutti i modelli video e immagine", values: () => true },
         {
-          label: "Priority queue",
-          values: (plan) => hasFeature(plan, "Priority queue"),
+          label: "Coda prioritaria",
+          values: (plan) => hasFeature(plan, "prioritaria"),
         },
       ],
     },
     {
-      title: "Rights & sharing",
+      title: "Diritti e Brand Kit",
       rows: [
         {
-          label: "Commercial use",
-          values: (plan) => hasFeature(plan, "Commercial use"),
+          label: "Uso commerciale per il locale",
+          values: (plan) => hasFeature(plan, "commerciale"),
         },
-        { label: "Personal library & projects", values: () => true },
-        { label: "Publish to Community", values: () => true },
+        {
+          label: "Brand Kit del ristorante e libreria",
+          values: () => true,
+        },
       ],
     },
   ]
@@ -105,14 +111,14 @@ function CellValue({ value }: { value: Cell }) {
     return (
       <>
         <Check className="size-4 text-lime" aria-hidden />
-        <span className="sr-only">Included</span>
+        <span className="sr-only">Incluso</span>
       </>
     )
   if (value === false)
     return (
       <>
         <X className="size-4 text-white/30" aria-hidden />
-        <span className="sr-only">Not included</span>
+        <span className="sr-only">Non incluso</span>
       </>
     )
   if (typeof value === "string")
@@ -128,7 +134,6 @@ function CellValue({ value }: { value: Cell }) {
   )
 }
 
-/** Free-plan CTA: sign up when signed out, otherwise go create. */
 function FreeCta({ className }: { className?: string }) {
   const { user, openAuth } = useApp()
   const base =
@@ -139,7 +144,7 @@ function FreeCta({ className }: { className?: string }) {
         href="/video"
         className={cn(base, "btn-keycap-white hover:bg-white/90", className)}
       >
-        Start creating
+        Apri lo Studio
       </Link>
     )
   return (
@@ -148,7 +153,7 @@ function FreeCta({ className }: { className?: string }) {
       onClick={() => openAuth({ mode: "signup" })}
       className={cn(base, "btn-keycap-white hover:bg-white/90", className)}
     >
-      Create free account
+      Crea account gratuito
     </button>
   )
 }
@@ -159,9 +164,7 @@ function FreeCard() {
     <div className="flex flex-col gap-5 rounded-[20px] border border-white/10 bg-panel p-6 md:flex-row md:items-center md:justify-between">
       <div className="flex flex-col gap-1">
         <h3 className="font-display text-2xl">{free.name}</h3>
-        <p className="text-sm text-muted-foreground">
-          {free.tagline}. Buy credits only when you need them.
-        </p>
+        <p className="text-sm text-muted-foreground">{free.tagline}.</p>
       </div>
       <ul className="flex flex-wrap gap-2 text-sm">
         {free.features
@@ -177,7 +180,7 @@ function FreeCard() {
           ))}
       </ul>
       <div className="flex items-center gap-4 md:shrink-0">
-        <span className="text-3xl font-bold tracking-tight">$0</span>
+        <span className="text-3xl font-bold tracking-tight">0 €</span>
         <FreeCta className="h-11 px-5 text-sm" />
       </div>
     </div>
@@ -189,7 +192,7 @@ function CompareTable({ interval }: { interval: BillingInterval }) {
   const groups = rowGroups()
   return (
     <table className="w-full table-fixed border-separate border-spacing-0 text-left text-xs md:text-sm">
-      <caption className="sr-only">Plan comparison</caption>
+      <caption className="sr-only">Confronto piani RistoReel</caption>
       <colgroup>
         <col className="w-[30%] md:w-[28%]" />
         {ORDER.map((id) => (
@@ -202,17 +205,17 @@ function CompareTable({ interval }: { interval: BillingInterval }) {
             scope="col"
             className="rounded-tl-3xl bg-panel px-3 pt-5 pb-4 align-bottom md:px-6"
           >
-            <span className="sr-only">Feature</span>
+            <span className="sr-only">Funzionalità</span>
             <span
               aria-hidden
               className="block text-[11px] font-normal text-muted-foreground md:hidden"
             >
-              Price / month
+              Prezzo / mese
             </span>
             <span className="hidden text-xs font-normal text-muted-foreground md:block">
               {interval === "year"
-                ? "Prices per month, billed annually"
-                : "Prices per month, billed monthly"}
+                ? "Prezzi in EUR al mese, fatturazione annuale"
+                : "Prezzi in EUR al mese, fatturazione mensile"}
             </span>
           </th>
           {ORDER.map((id, index) => {
@@ -235,11 +238,11 @@ function CompareTable({ interval }: { interval: BillingInterval }) {
                   <span className="text-[11px] text-muted-foreground md:text-sm">
                     {value ? (
                       <>
-                        {money(value)}
-                        <span className="hidden md:inline">/mo</span>
+                        {formatEuro(value)}
+                        <span className="hidden md:inline">/mese</span>
                       </>
                     ) : (
-                      "Free"
+                      "0 €"
                     )}
                   </span>
                   <span className="mt-2 hidden md:block">
@@ -259,7 +262,7 @@ function CompareTable({ interval }: { interval: BillingInterval }) {
                         className={cn(
                           "flex h-9 w-full items-center justify-center gap-1.5 rounded-[10px] px-3 text-sm font-semibold disabled:opacity-60",
                           id === "plus"
-                            ? "btn-keycap"
+                            ? "btn-keycap text-[#14151a]"
                             : "bg-raised text-white hover:bg-hover"
                         )}
                       >
@@ -269,7 +272,7 @@ function CompareTable({ interval }: { interval: BillingInterval }) {
                             aria-hidden
                           />
                         ) : null}
-                        Get {plan.name}
+                        Attiva {plan.name}
                       </button>
                     )}
                   </span>
@@ -321,7 +324,6 @@ function CompareTable({ interval }: { interval: BillingInterval }) {
   )
 }
 
-/** Interval toggle, plan cards, top-ups and the collapsible comparison table. */
 export function PricingView() {
   const [interval, setBillingInterval] = useState<BillingInterval>("year")
   const [compareOpen, setCompareOpen] = useState(false)
@@ -334,15 +336,15 @@ export function PricingView() {
       >
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h2 id="plans-title" className="text-lg font-semibold">
-            Plans
+            Piani in abbonamento (EUR €)
           </h2>
           <IntervalToggle value={interval} onChange={setBillingInterval} />
         </div>
         <FreeCard />
         <PlanGrid interval={interval} />
         <p className="text-xs text-muted-foreground">
-          Plan prices are in USD. Taxes may apply at checkout. Cancel any time
-          from Account → Billing.
+          Prezzi in Euro (€), IVA ove applicabile calcolata al checkout Stripe.
+          Disdici o cambi piano in qualsiasi momento da Account → Fatturazione.
         </p>
       </section>
 
@@ -356,11 +358,11 @@ export function PricingView() {
             id="topups-title"
             className="font-display text-[28px] leading-9 text-white"
           >
-            Top up credits
+            Ricariche crediti a consumo (Pay-per-use in EUR €)
           </h2>
           <p className="text-sm text-muted-foreground">
-            One-off packs for busy weeks. Top-up credits never expire, and paid
-            plans add a bonus to every pack.
+            Ideali per nuovi menù stagionali o campagne evento: i crediti
+            acquistati con ricarica singola non scadono mai.
           </p>
         </div>
         <TopupGrid />
@@ -375,10 +377,10 @@ export function PricingView() {
             id="compare-title"
             className="font-display text-[28px] leading-9 text-white md:text-[40px] md:leading-[48px]"
           >
-            Compare plans
+            Confronta i piani
           </h2>
           <p className="text-sm text-muted-foreground">
-            Every limit, side by side.
+            Tutte-le caratteristiche a confronto per singolo locale o catena.
           </p>
         </div>
         <button
@@ -388,7 +390,7 @@ export function PricingView() {
           onClick={() => setCompareOpen((open) => !open)}
           className="inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 px-5 text-sm font-semibold transition-colors hover:bg-white/5"
         >
-          {compareOpen ? "Hide comparison" : "Compare features"}
+          {compareOpen ? "Nascondi tabella" : "Mostra confronto dettagliato"}
           <ChevronDown
             className={cn(
               "size-4 transition-transform duration-200",

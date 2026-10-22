@@ -1,5 +1,17 @@
 # Vireo — contract for coding agents
 
+## RistoVideo specialization (owner-approved, 2026-10-21)
+
+- Product: Italian restaurant video studio, 20 areas and all 161 user-supplied topics in `lib/restaurant/catalog.ts`.
+- Preserve a Higgsfield-like studio layout; the owner explicitly requires different colors. Copper `#e8a276`, charcoal and cream override the original lime-only palette below.
+- `RESTAURANT_MODE=true` requires a valid structured brief on the server. Prompt context is deterministic; it is not a semantic moderation classifier.
+- Retail rule: supplier cost times 1.5, rounded up to whole credits. `creditConfig()` enforces the factor in restaurant mode. Never confuse a 50% markup with a 50% net margin.
+- Any changed accepted credit quote blocks the request before debit. Live restaurant requests fail closed when numeric supplier estimates cannot be verified.
+- Euro values use a dated ECB conversion for display only. Current credit checkout is USD; do not label it an EUR checkout. Restaurant top-ups have no inherited plan/pack bonuses; inherited subscriptions are not sold.
+- Local `.env.local` uses the mock only. The generated `public/media/ristorazione/demo.mp4` is an explicitly labeled demo fixture, not an AI output.
+- Before live launch: clarify upstream licenses, configure owned service credentials and validate real generation, payment currency and invoices end to end. Never print secrets or magic-link URLs.
+- Current stage is local development. Do not deploy demo mailboxes, mock credentials or simulated payment claims.
+
 Vireo is a credit-metered AI image/video studio on the Higgsfield REST API,
 scaffolded from `higgsfield-ai/app-templates` (studio). Read `README.md`,
 `docs/decisions.md` and `docs/model-catalog.md` before changing behaviour.

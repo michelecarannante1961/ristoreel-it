@@ -5,7 +5,7 @@ const ROUTES = [
   "/image",
   "/video",
   "/effects",
-  "/effects/neon-noir",
+  "/effects/risto-menu",
   "/community",
   "/pricing",
   "/login",

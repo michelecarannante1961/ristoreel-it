@@ -24,6 +24,15 @@ type Checkout =
     }
   | { kind: "topup"; pack: TopupId }
 
+export function formatEuro(value: number): string {
+  return new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: value % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(value)
+}
+
 /** Start Stripe Checkout (after sign-in if needed). */
 export function useCheckout() {
   const { user, openAuth } = useApp()
@@ -35,7 +44,7 @@ export function useCheckout() {
     if (!user) {
       openAuth({
         mode: "signup",
-        reason: "Create an account to choose a plan.",
+        reason: "Crea un account per attivare un piano o acquistare crediti.",
       })
       return
     }
@@ -46,7 +55,7 @@ export function useCheckout() {
       return
     }
     setPending(null)
-    toast.error("Checkout didn't start", result.error)
+    toast.error("Impossibile avviare il checkout", result.error)
   }
   return { start, pending }
 }
@@ -65,13 +74,13 @@ export function IntervalToggle({
           value === "month" ? "text-foreground" : "text-muted-foreground"
         }
       >
-        Monthly
+        Mensile
       </span>
       <button
         type="button"
         role="switch"
         aria-checked={value === "year"}
-        aria-label="Bill annually"
+        aria-label="Fatturazione annuale"
         onClick={() => onChange(value === "year" ? "month" : "year")}
         className={cn(
           "relative h-5 w-9 rounded-full transition-colors",
@@ -90,10 +99,10 @@ export function IntervalToggle({
           value === "year" ? "text-foreground" : "text-muted-foreground"
         }
       >
-        Annual
+        Annuale
       </span>
       <span className="font-display rounded bg-pink-strong px-1.5 py-0.5 text-[11px] text-white italic">
-        20% OFF
+        -20%
       </span>
     </div>
   )
@@ -105,10 +114,15 @@ const TONE: Record<string, string> = {
   ultra: "from-pink/[0.16] to-transparent",
 }
 
+const BADGE_LABEL: Record<string, string> = {
+  "MOST POPULAR": "PIÙ SCELTO",
+  "BEST VALUE": "MIGLIOR VALORE",
+}
+
 function price(plan: Plan, interval: BillingInterval): string {
   const value =
     interval === "year" ? plan.priceAnnualPerMonth : plan.priceMonthly
-  return value % 1 === 0 ? `$${value}` : `$${value.toFixed(2)}`
+  return formatEuro(value)
 }
 
 export function PlanCard({
@@ -139,7 +153,7 @@ export function PlanCard({
         <h3 className="font-display text-2xl">{plan.name}</h3>
         {interval === "year" && savings ? (
           <span className="font-display rounded bg-pink-strong px-1.5 py-0.5 text-[11px] text-white italic">
-            {savings}% OFF
+            -{savings}%
           </span>
         ) : null}
         {plan.badge ? (
@@ -151,7 +165,7 @@ export function PlanCard({
                 : "bg-[#0256fe] text-white"
             )}
           >
-            {plan.badge}
+            {BADGE_LABEL[plan.badge] ?? plan.badge}
           </span>
         ) : null}
       </div>
@@ -159,20 +173,19 @@ export function PlanCard({
       <div className="rounded-xl bg-black/20 p-4">
         <p className="flex items-center gap-1.5 text-[15px] font-semibold">
           <Sparkle className="size-4 fill-lime text-lime" />{" "}
-          {plan.monthlyCredits.toLocaleString("en-US")} credits/mo.
+          {plan.monthlyCredits.toLocaleString("it-IT")} crediti/mese
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          ≈ {Math.floor(plan.monthlyCredits / 18).toLocaleString("en-US")}{" "}
-          images or{" "}
-          {Math.floor(plan.monthlyCredits / 100).toLocaleString("en-US")}{" "}
-          five-second videos
+          Copioni e storyboard 3 scene sempre inclusi (0 crediti) · ≈{" "}
+          {Math.floor(plan.monthlyCredits / 100).toLocaleString("it-IT")} clip
+          video AI da 5s
         </p>
       </div>
       <div>
         <p className="flex items-baseline gap-2">
           {interval === "year" ? (
             <span className="text-lg text-pink line-through">
-              ${plan.priceMonthly}
+              {formatEuro(plan.priceMonthly)}
             </span>
           ) : null}
           <span className="text-4xl font-bold tracking-tight">
@@ -180,8 +193,10 @@ export function PlanCard({
           </span>
         </p>
         <p className="text-sm text-muted-foreground">
-          per month
-          {interval === "year" ? ", billed annually" : ", billed monthly"}
+          al mese
+          {interval === "year"
+            ? ", fatturato annualmente"
+            : ", fatturato mensilmente"}
         </p>
       </div>
       <button
@@ -191,20 +206,22 @@ export function PlanCard({
         className={cn(
           "flex h-12 items-center justify-center gap-2 rounded-xl text-base font-semibold transition disabled:cursor-not-allowed disabled:opacity-60",
           plan.id === "plus"
-            ? "btn-keycap"
+            ? "btn-keycap text-[#14151a]"
             : plan.id === "ultra"
               ? "bg-gradient-to-b from-[#e8005a] to-[#c20044] text-white shadow-[inset_0_-3px_0_rgba(0,0,0,0.3)]"
               : "btn-keycap-white"
         )}
       >
         {pending ? <Loader2 className="size-4 animate-spin" /> : null}
-        {current ? "Current plan" : `Get ${plan.name}`}
+        {current ? "Piano attuale" : `Attiva ${plan.name}`}
       </button>
       {interval === "year" ? (
         <p className="-mt-3 text-center text-xs text-muted-foreground">
-          Save $
-          {Math.round((plan.priceMonthly - plan.priceAnnualPerMonth) * 12)} a
-          year vs monthly
+          Risparmi{" "}
+          {formatEuro(
+            Math.round((plan.priceMonthly - plan.priceAnnualPerMonth) * 12)
+          )}{" "}
+          all&apos;anno rispetto al mensile
         </p>
       ) : null}
       {!compact ? (
@@ -288,23 +305,23 @@ export function TopupGrid({ currentPlan }: { currentPlan?: string }) {
             <span className="font-display text-lg">{pack.name}</span>
             <span className="flex items-center gap-1.5 text-2xl font-bold">
               <Sparkle className="size-5 fill-lime text-lime" />{" "}
-              {credits.toLocaleString("en-US")}
+              {credits.toLocaleString("it-IT")} crediti
             </span>
             <span className="text-sm text-muted-foreground">
-              ${pack.price} · ${((pack.price / credits) * 100).toFixed(2)} per
-              100 credits
+              {formatEuro(pack.price)} ·{" "}
+              {formatEuro((pack.price / credits) * 100)} per 100 crediti
             </span>
             {plan.topupMultiplier > 1 ? (
               <span className="rounded bg-lime/15 px-1.5 py-0.5 text-xs text-lime">
-                +{Math.round((plan.topupMultiplier - 1) * 100)}% {plan.name}{" "}
-                bonus
+                +{Math.round((plan.topupMultiplier - 1) * 100)}% bonus{" "}
+                {plan.name}
               </span>
             ) : null}
             <span className="mt-1 flex items-center gap-1.5 text-sm font-medium text-lime">
               {pending === pack.id ? (
                 <Loader2 className="size-3.5 animate-spin" />
               ) : null}
-              Buy credits →
+              Acquista ricarica →
             </span>
           </button>
         )

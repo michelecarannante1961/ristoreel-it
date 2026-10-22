@@ -27,7 +27,7 @@ export const checkoutSchema = z.discriminatedUnion("kind", [
 async function customerFor(user: SessionUser): Promise<string> {
   const { users } = await collections()
   const account = await users.findOne({ _id: user.objectId })
-  if (!account) throw new UserFacingError("Account not found.")
+  if (!account) throw new UserFacingError("Account non trovato.")
   if (account.stripeCustomerId) return account.stripeCustomerId
   const customer = await stripe().customers.create(
     { email: account.email, metadata: { userId: user.id } },
@@ -54,12 +54,12 @@ export async function createCheckoutSession(
     `checkout:${user.id}`,
     10,
     60 * 10,
-    "Too many checkout attempts. Try again in a few minutes."
+    "Troppi tentativi di pagamento ravvicinati. Riprova tra qualche minuto."
   )
   const appUrl = env().APP_URL.replace(/\/$/, "")
   const { users } = await collections()
   const account = await users.findOne({ _id: user.objectId })
-  if (!account) throw new UserFacingError("Account not found.")
+  if (!account) throw new UserFacingError("Account non trovato.")
   const customer = await customerFor(user)
 
   if (input.kind === "plan") {
@@ -69,7 +69,7 @@ export async function createCheckoutSession(
     const price = planPriceId(input.plan, input.interval)
     if (!price)
       throw new UserFacingError(
-        "This plan isn't available for purchase yet.",
+        "Questo piano in EUR non è ancora configurato sul server (manca l'ID prezzo Stripe).",
         "PRICE_MISSING"
       )
     const session = await stripe().checkout.sessions.create({
@@ -90,7 +90,8 @@ export async function createCheckoutSession(
         metadata: { userId: user.id, plan: input.plan },
       },
     })
-    if (!session.url) throw new UserFacingError("Could not start checkout.")
+    if (!session.url)
+      throw new UserFacingError("Impossibile avviare il checkout Stripe.")
     return { url: session.url }
   }
 
@@ -98,11 +99,23 @@ export async function createCheckoutSession(
   const price = topupPriceId(pack.id)
   if (!price)
     throw new UserFacingError(
-      "Top-ups aren't available for purchase yet.",
+      "Questa ricarica crediti in EUR non è ancora configurata sul server (manca l'ID prezzo Stripe).",
       "PRICE_MISSING"
     )
-  // The credit amount is fixed now (plan bonus included) and granted by the webhook.
   const credits = topupCredits(pack, planOf(account.plan))
+  if (env().RESTAURANT_MODE) {
+    const configuredPrice = await stripe().prices.retrieve(price)
+    if (
+      !configuredPrice.active ||
+      !["eur", "usd"].includes(configuredPrice.currency) ||
+      configuredPrice.unit_amount !== Math.round(pack.price * 100) ||
+      configuredPrice.recurring
+    )
+      throw new UserFacingError(
+        "La configurazione della ricarica Stripe deve essere verificata prima dell'acquisto.",
+        "PRICE_CONFIGURATION"
+      )
+  }
   const session = await stripe().checkout.sessions.create({
     mode: "payment",
     customer,
@@ -125,7 +138,8 @@ export async function createCheckoutSession(
       },
     },
   })
-  if (!session.url) throw new UserFacingError("Could not start checkout.")
+  if (!session.url)
+    throw new UserFacingError("Impossibile avviare il checkout Stripe.")
   return { url: session.url }
 }
 
@@ -136,13 +150,13 @@ export async function createPortalSession(
     `portal:${user.id}`,
     10,
     60 * 10,
-    "Too many attempts. Try again in a few minutes."
+    "Troppi tentativi ravvicinati. Riprova tra qualche minuto."
   )
   const { users } = await collections()
   const account = await users.findOne({ _id: user.objectId })
   if (!account?.stripeCustomerId)
     throw new UserFacingError(
-      "You don't have a billing account yet. Choose a plan first.",
+      "Non hai ancora un profilo di fatturazione attivo. Scegli prima un piano o una ricarica.",
       "NO_CUSTOMER"
     )
   const session = await stripe().billingPortal.sessions.create({

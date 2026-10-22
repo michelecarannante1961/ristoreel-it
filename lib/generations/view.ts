@@ -24,6 +24,7 @@ export interface GenerationView {
   modelId: string
   modelLabel: string
   prompt: string
+  restaurant?: RestaurantBrief
   settings: Record<string, unknown>
   media: { role: MediaRole; kind: MediaKind; url: string; name?: string }[]
   status: GenerationStatusView
@@ -69,3 +70,4 @@ export interface ProjectView {
   updatedAt: number
   createdAt: number
 }
+import type { RestaurantBrief } from "@/lib/restaurant/brief"

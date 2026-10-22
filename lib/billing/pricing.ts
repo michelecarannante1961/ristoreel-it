@@ -8,6 +8,7 @@ import { creditConfig } from "./config"
 import { fromPrice, toCreditTable, type CreditTable } from "./price"
 import { PRICING_TABLE } from "./pricing-table"
 import type { PricingTable } from "./pricing-types"
+import { euroDisplayRate, type EuroDisplayRate } from "./euro"
 
 /**
  * The pricing in force: static table (placeholders, then estimate-synced
@@ -76,6 +77,7 @@ export function invalidatePricing(): void {
 
 /** What client pages need: credit rules (no USD) and enabled model ids. */
 export type ClientPricing = {
+  euro?: EuroDisplayRate | null
   table: CreditTable
   disabled: string[]
   fromPrices: Record<string, number>
@@ -89,6 +91,7 @@ export async function clientPricing(): Promise<ClientPricing> {
     if (price !== null) fromPrices[model.id] = price
   }
   return {
+    euro: await euroDisplayRate(env().CREDIT_USD_VALUE),
     table: context.credits,
     disabled: [...context.disabled],
     fromPrices,

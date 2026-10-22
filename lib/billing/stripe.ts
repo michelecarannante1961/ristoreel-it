@@ -22,7 +22,7 @@ export function stripe(): Stripe {
       "Payments aren't configured on this server yet.",
       "BILLING_DISABLED"
     )
-  client ??= new Stripe(key, { appInfo: { name: "vireo-studio" } })
+  client ??= new Stripe(key, { appInfo: { name: "ristoreel-studio", url: "https://ristoreel.it" } })
   return client
 }
 

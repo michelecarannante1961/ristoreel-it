@@ -9,10 +9,10 @@ import { EmptyCard } from "@/components/marketing/empty-card"
 import { PRESET_CATEGORIES } from "@/lib/presets/seed-data"
 
 export const metadata: Metadata = {
-  title: "Visual effects",
+  title: "Stili e regia",
   description:
-    "Ready-made looks and camera moves for image and video. Pick an effect, describe your subject and generate.",
-  openGraph: { images: ["/media/presets/neon-noir.jpg"] },
+    "Percorsi visivi per i 20 ambiti della ristorazione: scegli un tema, aggiungi i tuoi materiali e crea.",
+  openGraph: { images: ["/media/ristorazione/piatto.jpg"] },
 }
 
 export default async function EffectsPage() {
@@ -27,24 +27,24 @@ export default async function EffectsPage() {
         <div className="mx-auto flex max-w-[1440px] flex-col items-start gap-5 px-4 pt-12 pb-10 md:items-center md:pt-20 md:pb-14 md:text-center">
           <Link
             href="/video"
-            className="font-display inline-flex h-8 items-center gap-1.5 rounded-full bg-lime/15 px-3 text-[13px] text-lime shadow-[0_0_24px_rgba(209,254,23,0.25)] transition-colors hover:bg-lime/25"
+            className="font-display inline-flex h-8 items-center gap-1.5 rounded-full bg-lime/15 px-3 text-[13px] text-lime shadow-[0_0_24px_rgba(232,162,118,0.25)] transition-colors hover:bg-lime/25"
           >
-            <Sparkles className="size-3.5" aria-hidden /> Try for free
+            <Sparkles className="size-3.5" aria-hidden /> Apri lo studio
           </Link>
           <h1
             id="effects-title"
             className="font-display text-[44px] leading-[0.95] tracking-[-0.04em] text-lime md:text-[96px] md:leading-[100px]"
           >
-            Visual effects
+            Stili e regia
           </h1>
           <p className="max-w-[560px] text-sm text-muted-foreground md:text-base">
-            Ready-made looks and camera moves. Pick one, describe your subject,
-            and the effect brings the lighting, lens and motion.
+            Percorsi per i 20 ambiti della ristorazione. Scegli il tema,
+            descrivi la scena e aggiungi i tuoi materiali di riferimento.
           </p>
         </div>
       </section>
       <section
-        aria-label="Effects gallery"
+        aria-label="Stili per la ristorazione"
         className="mx-auto w-full max-w-[1440px] px-4"
       >
         {effects.length > 0 ? (
@@ -52,14 +52,14 @@ export default async function EffectsPage() {
         ) : (
           <EmptyCard
             icon={<Wand2 className="size-5" aria-hidden />}
-            title="Effects are warming up"
-            body="We couldn't load the effects library just now. You can still generate from a prompt."
+            title="I percorsi non sono disponibili in questo momento"
+            body="Puoi comunque creare un progetto direttamente nello studio video."
             action={
               <Link
                 href="/video"
                 className="btn-keycap inline-flex h-10 items-center gap-2 rounded-[10px] px-4 text-sm font-semibold"
               >
-                <Sparkles className="size-4" aria-hidden /> Open the generator
+                <Sparkles className="size-4" aria-hidden /> Apri il generatore
               </Link>
             }
           />

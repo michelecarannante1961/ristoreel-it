@@ -22,6 +22,8 @@ export function setupEnv(): void {
     HF_PRICE_GUARD: "false",
     CREDIT_USD_VALUE: "0.01",
     CREDIT_MARKUP: "2",
+    // Legacy generic-studio fixtures. Restaurant integration tests enable this explicitly.
+    RESTAURANT_MODE: "false",
     RUN_TIMEOUT_MINUTES: "30",
     LOCAL_MEDIA_DIR: mkdtempSync(join(tmpdir(), "vireo-media-")),
   })

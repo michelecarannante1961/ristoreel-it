@@ -33,7 +33,7 @@ import { navLinks } from "./nav-links"
 /**
  * The site header: logo · Explore · Image · Video · (Audio) · Effects ·
  * Community · Pricing, then the credit pill, Upgrade and the avatar menu
- * (or Login / Sign up). `compact` is the 36 px app-page variant.
+ * (or Accedi / Registrati). `compact` is the 36 px app-page variant.
  */
 export function TopNav({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname()
@@ -48,6 +48,11 @@ export function TopNav({ compact = false }: { compact?: boolean }) {
       )}
     >
       <Logo compact={compact} />
+      {process.env.NEXT_PUBLIC_DEMO_MODE === "true" ? (
+        <span className="hidden rounded-full border border-lime/20 bg-lime/5 px-2 py-1 text-[9px] text-lime xl:inline-flex">
+          Anteprima · video simulati
+        </span>
+      ) : null}
       <nav
         aria-label="Main"
         className="hidden min-w-0 flex-1 items-center gap-1 md:flex"
@@ -75,7 +80,7 @@ export function TopNav({ compact = false }: { compact?: boolean }) {
         <AccountControls compact={compact} />
         <button
           type="button"
-          aria-label="Open menu"
+          aria-label="Apri menu"
           className="flex size-9 items-center justify-center rounded-[10px] bg-white/5 text-foreground md:hidden"
           onClick={() => setMobileOpen(true)}
         >
@@ -105,7 +110,7 @@ function AccountControls({ compact }: { compact: boolean }) {
             height
           )}
         >
-          Login
+          Accedi
         </button>
         <button
           type="button"
@@ -115,7 +120,7 @@ function AccountControls({ compact }: { compact: boolean }) {
             height
           )}
         >
-          Sign up
+          Registrati
         </button>
       </>
     )
@@ -130,7 +135,7 @@ function AccountControls({ compact }: { compact: boolean }) {
         )}
       >
         <Sparkle className="size-3.5 fill-lime text-lime" aria-hidden />
-        {credits === null ? "—" : credits.toLocaleString("en-US")}
+        {credits === null ? "—" : credits.toLocaleString("it-IT")}
       </Link>
       <button
         type="button"
@@ -140,7 +145,7 @@ function AccountControls({ compact }: { compact: boolean }) {
           height
         )}
       >
-        <Gem className="size-3.5" aria-hidden /> Upgrade
+        <Gem className="size-3.5" aria-hidden /> Crediti
       </button>
       <UserMenu />
     </>
@@ -154,7 +159,7 @@ function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label="Account menu"
+        aria-label="Menu account"
         className="flex size-8 items-center justify-center overflow-hidden rounded-full bg-raised text-sm font-semibold text-foreground ring-1 ring-white/10 transition hover:ring-white/30"
       >
         {user.image ? (
@@ -170,22 +175,22 @@ function UserMenu() {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem render={<Link href="/assets" />}>
-          <FolderOpen /> Assets
+          <FolderOpen /> Libreria
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link href="/account" />}>
           <UserRound /> Account
         </DropdownMenuItem>
         <DropdownMenuItem render={<Link href="/account/billing" />}>
-          <CreditCard /> Billing
+          <CreditCard /> Fatturazione
         </DropdownMenuItem>
         {user.role === "admin" ? (
           <DropdownMenuItem render={<Link href="/admin" />}>
-            <Shield /> Admin
+            <Shield /> Amministrazione
           </DropdownMenuItem>
         ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => void signOutAction()}>
-          <LogOut /> Sign out
+          <LogOut /> Esci
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -214,7 +219,7 @@ function MobileSheet({
             </DialogPrimitive.Title>
             <Logo compact />
             <DialogPrimitive.Close
-              aria-label="Close menu"
+              aria-label="Chiudi menu"
               className="flex size-9 items-center justify-center rounded-full bg-white/5"
             >
               <X className="size-4" />
@@ -278,7 +283,7 @@ function MobileSheet({
                     openAuth({ mode: "signup" })
                   }}
                 >
-                  Sign up
+                  Registrati
                 </button>
                 <button
                   type="button"

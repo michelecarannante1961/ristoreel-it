@@ -52,7 +52,7 @@ export async function balance(page: Page): Promise<number> {
 
 export async function dismissCookies(page: Page): Promise<void> {
   const reject = page.getByRole("button", {
-    name: "Reject non-essential cookies",
+    name: "Solo cookie essenziali",
   })
   if (await reject.isVisible().catch(() => false)) await reject.click()
 }

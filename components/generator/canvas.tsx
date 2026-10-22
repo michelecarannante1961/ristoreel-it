@@ -17,22 +17,22 @@ import type { Generator } from "./use-generator"
 const HEADLINE: Record<Surface, Record<GeneratorTab, [string, string]>> = {
   video: {
     create: [
-      "Make videos in one click",
-      "Start from text, a first frame or a stack of references — then direct the camera.",
+      "Dai vita al tuo ristorante",
+      "Scegli un percorso, descrivi la scena e aggiungi le foto del tuo locale.",
     ],
     edit: [
-      "Edit any video with words",
-      "Upload a clip, describe the change, keep the framing.",
+      "Una nuova luce alle tue clip",
+      "Carica un video del ristorante e descrivi la modifica.",
     ],
     motion: [
-      "Copy any motion",
-      "Give us a motion clip and a character image; we transfer every move.",
+      "Dirigi ogni movimento",
+      "Usa una clip di movimento e una fotografia come riferimenti per la nuova scena.",
     ],
   },
   image: {
     create: [
-      "Start creating with any model",
-      "Describe a scene, character, mood or style — and watch it come to life.",
+      "Prepara i fotogrammi del tuo ristorante",
+      "Piatti, ambienti e persone: descrivi un riferimento visivo per il tuo progetto.",
     ],
     edit: [
       "Edit images with words",
@@ -90,7 +90,7 @@ export function HowItWorks({
             </div>
             {centered ? (
               <span className="w-fit rounded-md bg-surface px-2 py-0.5 text-xs text-muted-foreground">
-                Step {index + 1}
+                Passo {index + 1}
               </span>
             ) : null}
             <h2 className="font-display text-xl">{step.title}</h2>
@@ -142,8 +142,8 @@ export function Canvas({
     >
       {(
         [
-          ["history", "History", FolderClosed],
-          ["how", "How it works", BookOpen],
+          ["history", "I tuoi video", FolderClosed],
+          ["how", "Come funziona", BookOpen],
         ] as const
       ).map(([value, label, Icon]) => (
         <button
@@ -167,7 +167,7 @@ export function Canvas({
 
   return (
     <section
-      aria-label="Results"
+      aria-label="Risultati"
       className={cn(
         "relative flex min-h-[60vh] min-w-0 flex-1 flex-col overflow-hidden rounded-[20px] border border-white/10 md:min-h-0",
         className
@@ -201,8 +201,8 @@ export function Canvas({
                 className="h-8 rounded-lg border border-white/5 bg-white/[0.02] px-2 text-xs text-foreground outline-none"
               >
                 <option value="all">All</option>
-                <option value="completed">Completed</option>
-                <option value="failed">Failed & blocked</option>
+                <option value="completed">Completati</option>
+                <option value="failed">Non riusciti</option>
               </select>
             }
             hasMore={runs.hasMore}
@@ -214,8 +214,8 @@ export function Canvas({
                 <HowItWorks surface={surface} tab={tab} />
               ) : !runs.loaded ? (
                 <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                  <Loader2 className="mr-2 size-4 animate-spin" /> Loading your
-                  history…
+                  <Loader2 className="mr-2 size-4 animate-spin" /> Caricamento
+                  dei tuoi video…
                 </div>
               ) : (
                 <HowItWorks surface={surface} tab={tab} />

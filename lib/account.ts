@@ -7,6 +7,11 @@ import { totalCredits } from "@/lib/billing/ledger"
 import { planOf, type BillingInterval, type PlanId } from "@/lib/billing/plans"
 import { billingEnabled } from "@/lib/billing/stripe"
 import {
+  DEFAULT_BRAND_KIT,
+  restaurantBrandKitSchema,
+  type RestaurantBrandKit,
+} from "@/lib/restaurant/brand-kit"
+import {
   collections,
   type Credits,
   type LedgerDoc,
@@ -27,6 +32,7 @@ export interface AccountView {
   total: number
   hasBillingAccount: boolean
   billingEnabled: boolean
+  brandKit: RestaurantBrandKit
   createdAt: number
 }
 
@@ -50,8 +56,19 @@ export async function getAccount(userId: ObjectId): Promise<AccountView> {
     total: totalCredits(credits),
     hasBillingAccount: Boolean(user.stripeCustomerId),
     billingEnabled: billingEnabled(),
+    brandKit: user.brandKit ?? DEFAULT_BRAND_KIT,
     createdAt: user.createdAt?.getTime() ?? 0,
   }
+}
+
+export async function saveBrandKit(
+  userId: ObjectId,
+  raw: unknown
+): Promise<RestaurantBrandKit> {
+  const brandKit = restaurantBrandKitSchema.parse(raw)
+  const { users } = await collections()
+  await users.updateOne({ _id: userId }, { $set: { brandKit } })
+  return brandKit
 }
 
 /** Live balance for the nav pill (never cached in the session). */
@@ -81,15 +98,15 @@ export interface LedgerEntryView {
 }
 
 const REASON_LABEL: Record<LedgerReason, string> = {
-  generation_debit: "Generation",
-  generation_refund: "Refund",
-  generation_adjust: "Adjustment",
-  subscription_grant: "Plan credits",
-  subscription_reset: "Plan credits",
-  topup_purchase: "Top-up",
-  signup_bonus: "Welcome bonus",
-  admin_adjust: "Adjustment by support",
-  stripe_refund: "Payment refunded",
+  generation_debit: "Generazione video/immagine",
+  generation_refund: "Rimborso automatico",
+  generation_adjust: "Conguaglio crediti",
+  subscription_grant: "Crediti piano mensile",
+  subscription_reset: "Rinnovo piano mensile",
+  topup_purchase: "Ricarica crediti",
+  signup_bonus: "Bonus di benvenuto",
+  admin_adjust: "Rettifica assistenza",
+  stripe_refund: "Pagamento rimborsato",
 }
 
 export function toLedgerView(doc: LedgerDoc): LedgerEntryView {

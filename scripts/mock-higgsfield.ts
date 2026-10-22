@@ -37,12 +37,11 @@ type Request = {
 const requests = new Map<string, Request>()
 const uploads = new Map<string, { type: string; body: Buffer }>()
 const images = [
-  ...readdirSync(join(PUBLIC, "presets")).map((f) => `presets/${f}`),
-  ...readdirSync(join(PUBLIC, "showcase")).map((f) => `showcase/${f}`),
+  ...readdirSync(join(PUBLIC, "ristorazione")).map((f) => `ristorazione/${f}`),
 ].filter((f) => f.endsWith(".jpg"))
-const videos = readdirSync(join(PUBLIC, "loops"))
+const videos = readdirSync(join(PUBLIC, "ristorazione"))
   .filter((f) => f.endsWith(".mp4"))
-  .map((f) => `loops/${f}`)
+  .map((f) => `ristorazione/${f}`)
 
 const TYPES: Record<string, string> = {
   ".jpg": "image/jpeg",

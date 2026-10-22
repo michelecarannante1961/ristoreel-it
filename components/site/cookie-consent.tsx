@@ -66,10 +66,10 @@ export function CookieConsent() {
       {visible && !preferences ? (
         <div
           role="dialog"
-          aria-label="Cookie notice"
+          aria-label="Informativa cookie"
           className="fixed right-4 bottom-4 left-4 z-[60] flex max-w-sm flex-col gap-3 rounded-2xl border border-white/5 bg-surface p-5 shadow-2xl sm:left-auto"
         >
-          <p className="text-lg font-semibold">Cookie notice</p>
+          <p className="text-lg font-semibold">Informativa cookie</p>
           <p className="text-sm text-muted-foreground">
             We use essential cookies to keep you signed in. With your permission
             we&apos;d also use analytics cookies to improve the studio. See our{" "}
@@ -77,7 +77,7 @@ export function CookieConsent() {
               href="/legal/privacy"
               className="text-foreground underline underline-offset-2"
             >
-              privacy policy
+              informativa sulla privacy
             </Link>
             .
           </p>
@@ -87,21 +87,21 @@ export function CookieConsent() {
               className="btn-keycap h-10 rounded-[10px] text-sm font-semibold"
               onClick={() => decide({ analytics: true, marketing: true })}
             >
-              Accept all cookies
+              Accetta tutti
             </button>
             <button
               type="button"
               className="h-10 rounded-[10px] bg-white/10 text-sm font-medium hover:bg-white/15"
               onClick={() => decide({ analytics: false, marketing: false })}
             >
-              Reject non-essential cookies
+              Solo cookie essenziali
             </button>
             <button
               type="button"
               className="h-10 rounded-[10px] border border-white/10 text-sm font-medium hover:bg-white/5"
               onClick={() => setPreferences(true)}
             >
-              Cookie preferences
+              Preferenze cookie
             </button>
           </div>
         </div>
@@ -109,28 +109,28 @@ export function CookieConsent() {
       <Dialog open={preferences} onOpenChange={setPreferences}>
         <DialogContent size="sm">
           <DialogHeader>
-            <DialogTitle>Cookie preferences</DialogTitle>
+            <DialogTitle>Preferenze cookie</DialogTitle>
             <DialogDescription>
-              Choose which optional cookies we may use.
+              Scegli quali cookie facoltativi possiamo usare.
             </DialogDescription>
           </DialogHeader>
           <DialogBody>
             <div className="flex flex-col gap-3">
               <Toggle
-                label="Essential"
-                hint="Sign-in and security. Always on."
+                label="Essenziali"
+                hint="Accesso e sicurezza. Sempre attivi."
                 checked
                 disabled
               />
               <Toggle
-                label="Analytics"
-                hint="Anonymous usage to improve the product."
+                label="Analisi"
+                hint="Statistiche anonime per migliorare lo studio."
                 checked={analytics}
                 onChange={setAnalytics}
               />
               <Toggle
                 label="Marketing"
-                hint="Measure our campaigns."
+                hint="Misurazione delle campagne."
                 checked={marketing}
                 onChange={setMarketing}
               />
@@ -141,10 +141,10 @@ export function CookieConsent() {
               variant="ghost"
               onClick={() => decide({ analytics: false, marketing: false })}
             >
-              Reject all
+              Rifiuta i facoltativi
             </Button>
             <Button onClick={() => decide({ analytics, marketing })}>
-              Save choices
+              Salva preferenze
             </Button>
           </DialogFooter>
         </DialogContent>

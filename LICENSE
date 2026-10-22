@@ -1,0 +1,12 @@
+RISTOREEL STUDIO (ristoreel.it) — NOTA SULLA LICENZA E SULLA TITOLARITÀ DEL CODICE
+
+1. Componenti proprietarie RistoReel (Tutti i diritti riservati al titolare del progetto):
+   - Catalogo strutturato dei 20 ambiti e 161 sottoargomenti della ristorazione (`lib/restaurant/catalog.ts`)
+   - Compilatore deterministico dei prompt di ristorazione e filtri server-side fuori tema (`lib/restaurant/brief.ts`)
+   - Generatore ibrido di Copioni e Storyboard in 3 scene (`lib/restaurant/storyboard.ts`)
+   - Sistema Brand Kit del Ristorante (`lib/restaurant/brand-kit.ts`, `components/account/brand-kit-card.tsx`)
+   - Interfaccia dedicata alla ristorazione (`components/restaurant/explore.tsx`, `components/generator/restaurant-brief.tsx`, `styles/restaurant.css`)
+
+2. Base tecnologica upstream:
+   - Derivata da `albertshiney/higgsfieldclone` (scaffoldato da `higgsfield-ai/app-templates`).
+   - Poiché il repository `albertshiney/higgsfieldclone` non includeva un file LICENSE esplicito al commit di partenza (`133f556928c408574fd2ad89c669d187f57a12ff`), per l'utilizzo commerciale in produzione si raccomanda di conservare questa nota o fare riferimento ai termini del template ufficiale `higgsfield-ai/app-templates`.

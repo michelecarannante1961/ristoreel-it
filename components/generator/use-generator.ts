@@ -29,6 +29,10 @@ import type {
 } from "@/generation/catalog/types"
 import { activeModelId, useDock } from "@/generation/stores/dock"
 import { useSettings } from "@/generation/stores/settings"
+import { useRestaurant } from "@/generation/stores/restaurant"
+import { restaurantPrompt } from "@/lib/restaurant/brief"
+import { PURPOSES } from "@/lib/restaurant/brief"
+import { restaurantArea } from "@/lib/restaurant/catalog"
 import { toPlatform } from "@/generation/to-platform"
 import { tryPriceFor } from "@/lib/billing/price"
 import type { GenerationView } from "@/lib/generations/view"
@@ -85,6 +89,12 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const pendingResume = useRef(false)
+  const restaurantBrief = useRestaurant((state) => state.brief)
+  const brandKit = useRestaurant((state) => state.brandKit)
+  const updateRestaurant = useRestaurant((state) => state.update)
+  const chooseArea = useRestaurant((state) => state.chooseArea)
+  const setBrandKit = useRestaurant((state) => state.setBrandKit)
+  const applyBrandKit = useRestaurant((state) => state.applyBrandKit)
 
   const disabled = useMemo(() => new Set(pricing.disabled), [pricing.disabled])
   const tabs = useMemo(() => tabsFor(surface), [surface])
@@ -126,6 +136,20 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
     const tabParam = params.get("tab") as GeneratorTab | null
     const presetParam = params.get("preset")
     const animate = params.get("animate")
+    const areaParam = params.get("ambito")
+    if (areaParam) chooseArea(areaParam)
+    const topicParam = params.get("argomento")
+    if (
+      areaParam &&
+      topicParam &&
+      restaurantArea(areaParam)?.topics.includes(topicParam)
+    )
+      updateRestaurant({ topic: topicParam })
+    const purposeParam = params.get("obiettivo")
+    if (purposeParam && Object.hasOwn(PURPOSES, purposeParam))
+      updateRestaurant({ purpose: purposeParam as keyof typeof PURPOSES })
+    const ideaParam = params.get("idea")
+    if (ideaParam) setPromptState(surface, ideaParam.slice(0, 3000))
     if (modelParam && findModel(modelParam)?.surface === surface)
       setModelId(surface, modelParam)
     else if (tabParam && tabsFor(surface).includes(tabParam))
@@ -133,6 +157,7 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
     if (presetParam) {
       const found = presets.find((item) => item.slug === presetParam)
       if (found && found.surface === surface) {
+        if (found.slug.startsWith("risto-")) chooseArea(found.slug.slice(6))
         setModelId(surface, found.modelId)
         setSetting(found.modelId, found.settings)
         setPreset(surface, found.id)
@@ -158,7 +183,17 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
     }
     const resume = params.get("resume")
     const cleaned = new URLSearchParams(params)
-    for (const name of ["model", "tab", "preset", "animate", "resume"])
+    for (const name of [
+      "model",
+      "tab",
+      "preset",
+      "animate",
+      "resume",
+      "ambito",
+      "argomento",
+      "obiettivo",
+      "idea",
+    ])
       cleaned.delete(name)
     if (cleaned.toString() !== key) {
       const query = cleaned.toString()
@@ -187,9 +222,10 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
 
   /* ── Validation and price ──────────────────────────────────────────────── */
   const inputMode = model ? inferInputMode(model, media) : undefined
-  const finalPrompt = preset
+  const creativePrompt = preset
     ? presetPrompt(preset.promptTemplate, prompt)
     : prompt
+  const finalPrompt = restaurantPrompt(restaurantBrief, creativePrompt)
   const validation = useMemo(() => {
     if (!model)
       return { plane: null, path: null, error: "No model is available." }
@@ -219,15 +255,15 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
     [finalPrompt, media, model, pricing.table, settings]
   )
 
-  const hasInput = finalPrompt.trim().length > 0 || media.length > 0
+  const hasInput = prompt.trim().length > 0 || media.length > 0
   // The endpoint these settings reach has no price (yet) on this deployment.
   const unpriced = Boolean(validation.path && !pricing.table[validation.path])
   const disabledReason = !hasInput
     ? model?.requirePrompt ||
       !model?.roles ||
       Object.keys(model.roles).length === 0
-      ? "Describe what you want to create."
-      : "Add a prompt or a reference."
+      ? "Descrivi la scena del tuo ristorante."
+      : "Aggiungi una descrizione o un riferimento."
     : (validation.error ??
       (unpriced
         ? "This option isn't available yet. Try another model or setting."
@@ -242,7 +278,7 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
       openAuth({
         mode: "signup",
         resume: "generate",
-        reason: "Create a free account to generate — your prompt is saved.",
+        reason: "Accedi per generare: il tuo progetto è salvato.",
       })
       return
     }
@@ -251,7 +287,9 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
     const result = await runs.submit({
       submitKey: newKey(),
       modelId: model.id,
-      prompt: finalPrompt,
+      prompt: creativePrompt,
+      restaurant: restaurantBrief,
+      acceptedCredits: quote?.credits,
       settings,
       media: media.map((item) => ({
         role: item.role,
@@ -274,9 +312,11 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
       return
     }
     if (result.record.status === "failed")
-      toast.error("Generation couldn't start", result.record.error)
+      toast.error("La generazione non è partita", result.record.error)
   }, [
-    finalPrompt,
+    creativePrompt,
+    restaurantBrief,
+    quote,
     media,
     model,
     openAuth,
@@ -294,7 +334,7 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
     if (!pendingResume.current || !user || !validation.plane || submitting)
       return
     pendingResume.current = false
-    toast.info("Continuing your generation…")
+    toast.info("Riprendo la generazione…")
     void generate()
   }, [generate, submitting, toast, user, validation.plane])
 
@@ -393,6 +433,7 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
       setModelId(surface, target.id)
       setSetting(target.id, run.settings)
       setPromptState(surface, run.prompt)
+      if (run.restaurant) updateRestaurant(run.restaurant)
       setPreset(surface, undefined)
       setMediaState(
         surface,
@@ -404,7 +445,7 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
           ...(item.name ? { name: item.name } : {}),
         }))
       )
-      toast.info("Prompt and settings restored")
+      toast.info("Progetto e impostazioni ripristinati")
     },
     [
       router,
@@ -415,10 +456,24 @@ export function useGenerator(surface: Surface, presets: PresetView[] = []) {
       setSetting,
       surface,
       toast,
+      updateRestaurant,
     ]
   )
 
   return {
+    euroQuote:
+      quote && pricing.euro
+        ? {
+            amount: quote.credits * pricing.euro.eurPerCredit,
+            date: pricing.euro.date,
+          }
+        : null,
+    restaurantBrief,
+    brandKit,
+    updateRestaurant,
+    chooseArea,
+    setBrandKit,
+    applyBrandKit,
     surface,
     tab,
     tabs,

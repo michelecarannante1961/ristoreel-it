@@ -141,7 +141,7 @@ export function ReportDialog({
                     value={item.value}
                     checked={reason === item.value}
                     onChange={() => setReason(item.value)}
-                    className="size-4 shrink-0 accent-[#d1fe17] focus-visible:outline-none"
+                    className="size-4 shrink-0 accent-[#e8a276] focus-visible:outline-none"
                   />
                   <span className="flex flex-col">
                     <span className="text-sm font-medium">{item.label}</span>

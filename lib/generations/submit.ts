@@ -18,6 +18,7 @@ import {
 } from "@/lib/billing/ledger"
 import { planOf } from "@/lib/billing/plans"
 import {
+  creditsFromUsd,
   extraItems,
   factorFor,
   quoteRequest,
@@ -30,6 +31,13 @@ import {
   type GenerationDoc,
 } from "@/lib/db/collections"
 import { env } from "@/lib/env"
+import { creditConfig } from "@/lib/billing/config"
+import { livePlatform } from "@/lib/billing/pricing"
+import {
+  isOffTopicRestaurantPrompt,
+  restaurantBriefSchema,
+  restaurantPrompt,
+} from "@/lib/restaurant/brief"
 import {
   AmbiguousSubmitError,
   higgsfield,
@@ -61,6 +69,8 @@ export const submitSchema = z.object({
     .default([]),
   projectId: z.string().nullish(),
   presetId: z.string().max(80).optional(),
+  restaurant: restaurantBriefSchema.optional(),
+  acceptedCredits: z.number().int().positive().optional(),
 })
 
 export type SubmitInput = z.input<typeof submitSchema>
@@ -88,6 +98,8 @@ async function guardPrice(
   ourUsd: number
 ): Promise<void> {
   const value = env()
+  // The mock's fixed estimate is test data, not a live supplier price.
+  if (value.RESTAURANT_MODE && !livePlatform()) return
   if (!value.HF_PRICE_GUARD || !value.HF_CREDENTIALS) return
   let liveUsd: number
   try {
@@ -100,10 +112,24 @@ async function guardPrice(
       ])
     ).usd
   } catch {
-    return // fail open: the table price stands
+    if (value.RESTAURANT_MODE && livePlatform())
+      throw new UserFacingError(
+        "Non è possibile verificare il costo del video in questo momento. Riprova più tardi: nessun credito è stato addebitato.",
+        "ESTIMATE_UNAVAILABLE"
+      )
+    return
   }
+  if (!Number.isFinite(liveUsd) || liveUsd < 0)
+    throw new UserFacingError(
+      "Preventivo del fornitore non valido. Nessun addebito.",
+      "ESTIMATE_UNAVAILABLE"
+    )
   const { modelPricing } = await collections()
-  if (liveUsd <= ourUsd * FLAG_DRIFT) {
+  const retailChanged =
+    value.RESTAURANT_MODE &&
+    creditsFromUsd(liveUsd, creditConfig()) !==
+      creditsFromUsd(ourUsd, creditConfig())
+  if (!retailChanged && liveUsd <= ourUsd * FLAG_DRIFT) {
     // Back in line (e.g. after `pnpm pricing:sync`): clear a stale flag.
     await modelPricing.updateOne(
       { modelId, "repriceNeeded.path": path },
@@ -125,9 +151,9 @@ async function guardPrice(
   console.error(
     `[pricing] live cost $${liveUsd} exceeds our price basis $${ourUsd} for ${path}`
   )
-  if (liveUsd <= ourUsd * BLOCK_DRIFT) return
+  if (!retailChanged && liveUsd <= ourUsd * BLOCK_DRIFT) return
   throw new UserFacingError(
-    "This setting is being repriced. Try again shortly or pick another model.",
+    "Il costo del modello è cambiato. Il prezzo deve essere aggiornato prima della generazione: nessun credito è stato addebitato.",
     "REPRICING"
   )
 }
@@ -137,6 +163,21 @@ export async function submitGeneration(
   raw: unknown
 ): Promise<GenerationView> {
   const input = submitSchema.parse(raw)
+  if (env().RESTAURANT_MODE && !input.restaurant)
+    throw new UserFacingError(
+      "Scegli un ambito e un sottoargomento della ristorazione.",
+      "RESTAURANT_REQUIRED"
+    )
+  if (env().RESTAURANT_MODE && !input.prompt.trim() && !input.media.length)
+    throw new UserFacingError(
+      "Descrivi la scena del ristorante o carica un riferimento.",
+      "INVALID_INPUT"
+    )
+  if (env().RESTAURANT_MODE && isOffTopicRestaurantPrompt(input.prompt))
+    throw new UserFacingError(
+      "RistoReel è dedicato esclusivamente alla ristorazione. Descrivi una scena legata a piatti, sala, cucina, brigata o gestione del locale.",
+      "OFF_TOPIC"
+    )
   await enforceRateLimit(
     `submit:${user.id}`,
     LIMITS.submitPerUser.limit,
@@ -168,7 +209,11 @@ export async function submitGeneration(
     plane = {
       model: model.id,
       inputMode: inferInputMode(model, media),
-      prompt: { text: input.prompt.trim() },
+      prompt: {
+        text: input.restaurant
+          ? restaurantPrompt(input.restaurant, input.prompt)
+          : input.prompt.trim(),
+      },
       media: groupMedia(media),
       settings: parseSettings(model, input.settings),
     }
@@ -188,6 +233,11 @@ export async function submitGeneration(
       "UNPRICED"
     )
   const quote = quoteRequest(request, media, pricing.credits)
+  if (env().RESTAURANT_MODE && input.acceptedCredits !== quote.credits)
+    throw new UserFacingError(
+      "Il preventivo è cambiato. Aggiorna la pagina per vedere il prezzo prima di generare.",
+      "REPRICING"
+    )
   const priceUsd = usdForRequest(usdRule, request, media, quote.units)
   await guardPrice(model.id, request.path, request.body, priceUsd)
 
@@ -217,6 +267,9 @@ export async function submitGeneration(
     modelPath: request.path,
     requestBody: request.body,
     prompt: plane.prompt.text,
+    ...(input.restaurant
+      ? { restaurant: input.restaurant, sourcePrompt: input.prompt }
+      : {}),
     settings: plane.settings,
     media: media.map(({ role, kind, displayUrl, name }) => ({
       role,

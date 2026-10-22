@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { TriangleAlert } from "lucide-react"
+import { ShieldCheck } from "lucide-react"
 
 import { BRAND } from "@/lib/brand"
 
@@ -10,178 +10,115 @@ type LegalDoc = { title: string; summary: string; sections: Section[] }
 
 const name = BRAND.name
 
-/**
- * PLACEHOLDER legal copy. It describes how the product works so the pages are
- * useful in development, but it has not been reviewed by a lawyer and must be
- * replaced before launch.
- */
 const DOCS: Record<string, LegalDoc> = {
   terms: {
-    title: "Terms of Service",
-    summary: `The rules for using ${name}: your account, credits and plans, and what you can do with what you make.`,
+    title: "Termini di Servizio",
+    summary: `Condizioni d'uso di ${name}: account, modello ibrido (copioni gratuiti + video AI a crediti), abbonamenti e ricariche in Euro (€).`,
     sections: [
       {
         id: "agreement",
-        title: "1. The agreement",
+        title: "1. Oggetto del servizio",
         body: [
-          `These terms are an agreement between you and ${name} about your use of our website, studio and related services. By creating an account or using ${name} you accept them.`,
-          "If you use the service for a company, you confirm you can accept these terms on its behalf.",
+          `${name} è una piattaforma software specializzata esclusivamente nella progettazione di copioni, storyboard e produzioni video AI per il settore della ristorazione professionale (promozione del locale, formazione del personale di sala e cucina, spiegazione di processi gestionali).`,
+          "Creando un account o utilizzando il servizio per conto di un ristorante, società o agenzia, confermi di avere i poteri per accettare i presenti Termini.",
         ],
       },
       {
-        id: "account",
-        title: "2. Your account",
+        id: "hybrid-model",
+        title: "2. Modello Ibrido: Copioni gratuiti e Crediti AI",
         body: [
-          "You sign in with a link sent to your email address. Keep access to that inbox secure; anyone who can open it can sign in as you.",
-          "You must be at least 18 years old, or the age of majority where you live, to create an account.",
+          "La progettazione testuale di copioni e storyboard in 3 scene sui 20 ambiti della ristorazione è gratuita (0 crediti).",
+          "La generazione di video e immagini tramite modelli AI esterni richiede crediti. Il preventivo in crediti viene sempre mostrato prima dell'avvio e ricalcolato sul server in base alla regola commerciale (costo fornitore × 1,50 arrotondato al credito intero).",
+          "In caso di generazione non riuscita, annullata o bloccata per variazione del listino fornitore, i crediti vengono rimborsati automaticamente sul saldo dell'utente.",
         ],
       },
       {
-        id: "credits",
-        title: "3. Credits, plans and payments",
+        id: "billing",
+        title: "3. Abbonamenti e Ricariche in Euro (€)",
         body: [
-          "Generations are paid for with credits. The price of each run is shown before you start it. Credits for failed, canceled or filtered runs are returned automatically.",
-          "Plan credits are refilled at each monthly renewal and do not carry over. Top-up credits do not expire. Credits have no cash value and cannot be transferred.",
-          "Subscriptions renew automatically until canceled. You can cancel at any time; your plan remains active until the end of the paid period.",
+          "I piani in abbonamento (Trattoria, Ristorante, Gruppo & Agenzia) sono fatturati in Euro (€) con cadenza mensile o annuale tramite Stripe e rinnovano la dotazione mensile di crediti.",
+          "I pacchetti di ricarica a consumo (Pay-per-use in Euro €) assegnano crediti che non scadono finché l'account resta attivo. I crediti non sono convertibili in denaro né trasferibili tra account.",
         ],
       },
       {
         id: "content",
-        title: "4. What you create",
+        title: "4. Titolarità dei materiali e responsabilità HACCP",
         body: [
-          "You keep your rights in the prompts and files you upload. Subject to these terms and your plan, you may use the images and videos you generate, including commercially on paid plans.",
-          "If you publish a generation to Community, you allow other visitors to view it and to reuse its prompt and settings to make their own work.",
+          "Il ristoratore mantiene la piena proprietà di fotografie di piatti, sale, loghi, ricette e testi caricati nella piattaforma. Con i piani a pagamento o le ricariche, i video generati possono essere utilizzati commercialmente sui canali social, sito web e materiali formativi del locale.",
+          "Per gli ambiti relativi a sicurezza alimentare, HACCP e allergeni, i contenuti generati hanno valore esclusivamente illustrativo e devono essere sempre verificati e approvati dal responsabile del piano di autocontrollo del locale.",
         ],
       },
       {
-        id: "use",
-        title: "5. Acceptable use",
+        id: "contact",
+        title: "5. Assistenza e contatti",
         body: [
-          "You agree to follow our Acceptable Use Policy. We may block, remove or unpublish content, and suspend accounts, that break it.",
-        ],
-      },
-      {
-        id: "service",
-        title: "6. The service",
-        body: [
-          `${name} relies on third-party AI models. Results vary, models change, and we may add, update or retire models and features.`,
-          "We work to keep the service available but do not promise it will be uninterrupted or error-free.",
-        ],
-      },
-      {
-        id: "liability",
-        title: "7. Disclaimers and liability",
-        body: [
-          "The service is provided as is. To the extent the law allows, our total liability is limited to the amount you paid us in the twelve months before the claim.",
-        ],
-      },
-      {
-        id: "changes",
-        title: "8. Changes and contact",
-        body: [
-          "We may update these terms. If a change is material we will tell you before it takes effect.",
-          `Questions? Write to ${BRAND.supportEmail}.`,
+          `Per qualsiasi richiesta contrattuale, tecnica o di fatturazione puoi scrivere a ${BRAND.supportEmail}.`,
         ],
       },
     ],
   },
   privacy: {
-    title: "Privacy Policy",
-    summary: `What ${name} collects, why, who it is shared with and the choices you have.`,
+    title: "Informativa Privacy (GDPR)",
+    summary: `Come ${name} tratta i dati personali e i materiali del tuo ristorante nel rispetto del Regolamento UE 2016/679 (GDPR).`,
     sections: [
       {
         id: "collect",
-        title: "1. What we collect",
+        title: "1. Dati raccolti",
         body: [
-          "Account data: your email address and, if you add them, a name and profile picture.",
-          "Creative data: the prompts, settings and reference files you submit and the media we generate for you.",
-          "Billing data: plan, purchase history and credit balance. Card details are handled by our payment processor and never reach our servers.",
-          "Technical data: basic logs such as IP address, browser and error reports, used to keep the service secure and working.",
+          "Dati dell'account: indirizzo email professionale, nome e impostazioni del profilo.",
+          "Brand Kit e materiali del ristorante: nome del locale, tipo di cucina, specialità, copioni e fotografie/video di riferimento caricati nella libreria.",
+          "Dati di fatturazione: piano scelto, storico crediti e riferimenti transazione. I dati delle carte di pagamento sono gestiti esclusivamente da Stripe.",
         ],
       },
       {
         id: "use",
-        title: "2. How we use it",
+        title: "2. Finalità del trattamento",
         body: [
-          "To run the service: generate media, keep your library, charge and refund credits, and send sign-in and billing emails.",
-          "To keep it safe: rate limiting, fraud prevention and content moderation, including reviewing reports from other users.",
+          "Erogazione del servizio di progettazione copioni e generazione video AI, gestione della libreria privata del ristorante, contabilizzazione crediti e invio dei link di accesso e ricevute.",
+          "Prevenzione abusi, limiti di frequenza (rate limiting) e tutela della sicurezza dell'infrastruttura.",
         ],
       },
       {
         id: "sharing",
-        title: "3. Who we share it with",
+        title: "3. Fornitori tecnologici",
         body: [
-          "Model providers receive the prompts and files needed to produce each generation.",
-          "Infrastructure providers host our database, media storage and email delivery. Our payment processor handles checkout.",
-          "We do not sell your personal data.",
-        ],
-      },
-      {
-        id: "public",
-        title: "4. Public content",
-        body: [
-          "Generations are private unless you publish them. Published work shows your display name and avatar, never your email address. You can unpublish at any time.",
-        ],
-      },
-      {
-        id: "cookies",
-        title: "5. Cookies",
-        body: [
-          "We use essential cookies to keep you signed in and secure. Analytics or marketing cookies are only set if you allow them in Cookie settings.",
+          "I prompt compilati e i file di riferimento selezionati per una generazione vengono trasmessi alle API di generazione AI (Higgsfield) al solo scopo di produrre il contenuto richiesto.",
+          "Non vendiamo né cediamo a terzi i dati o le fotografie dei ristoranti clienti.",
         ],
       },
       {
         id: "rights",
-        title: "6. Retention and your rights",
+        title: "4. Diritti dell'interessato",
         body: [
-          "We keep your data while your account is active and delete it within a reasonable period after you close it, except where the law requires us to keep records such as invoices.",
-          `You can ask for a copy of your data, correct it or delete it by writing to ${BRAND.supportEmail}.`,
+          `Puoi richiedere in qualsiasi momento l'accesso, la rettifica, l'esportazione o la cancellazione dei dati del tuo account scrivendo a ${BRAND.supportEmail}.`,
         ],
       },
     ],
   },
   "acceptable-use": {
-    title: "Acceptable Use Policy",
-    summary: `What you can't make or do with ${name}, and what happens when someone does.`,
+    title: "Uso Consentito (Esclusiva Ristorazione)",
+    summary: `Regole di utilizzo della piattaforma ${name} e vincolo di destinazione al settore ristorazione.`,
     sections: [
       {
-        id: "never",
-        title: "1. Never allowed",
+        id: "scope",
+        title: "1. Destinazione esclusiva alla ristorazione",
         body: [
-          "Sexual content involving minors, or content that sexualises minors in any way.",
-          "Sexual or intimate imagery of a real person without their consent.",
-          "Content that impersonates real people to deceive, including fake endorsements and misleading deepfakes.",
+          `${name} è riservato alla creazione di contenuti legati a ristoranti, trattorie, pizzerie, bistrot, pasticcerie, bar, catering e ospitalità gastronomica.`,
+          "Il server verifica la presenza di un ambito e sottoargomento validi e blocca richieste manifestamente estranee al settore.",
         ],
       },
       {
-        id: "harm",
-        title: "2. Harmful content",
+        id: "truthfulness",
+        title: "2. Veridicità verso i consumatori",
         body: [
-          "Content that promotes violence, terrorism or self-harm, or that harasses or threatens people.",
-          "Hateful content that attacks people for who they are.",
-          "Instructions or imagery meant to help someone cause serious harm.",
+          "È vietato utilizzare il servizio per generare recensioni false, attribuzioni ingannevoli di marchi DOP/IGP non utilizzati dal locale, certificazioni sanitarie inesistenti o promesse commerciali ingannevoli.",
         ],
       },
       {
-        id: "rights",
-        title: "3. Other people's rights",
+        id: "prohibited",
+        title: "3. Contenuti vietati",
         body: [
-          "Only upload references you have the right to use. Don't use the service to copy someone else's copyrighted work, trademark or likeness without permission.",
-        ],
-      },
-      {
-        id: "platform",
-        title: "4. Respect the platform",
-        body: [
-          "No spam, scams or malware. No attempts to get around content filters, rate limits or credit charges, and no automated scraping of the site.",
-        ],
-      },
-      {
-        id: "enforcement",
-        title: "5. Reporting and enforcement",
-        body: [
-          "Use the Report button on any public generation to flag it. Our team reviews reports and may unpublish content, remove it or suspend accounts.",
-          `For urgent concerns, write to ${BRAND.supportEmail}.`,
+          "È severamente vietato caricare o generare contenuti illeciti, diffamatori, violenti, sessualmente espliciti o lesivi dei diritti d'autore e d'immagine di terzi senza consenso.",
         ],
       },
     ],
@@ -205,11 +142,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { doc } = await params
   const entry = Object.hasOwn(DOCS, doc) ? DOCS[doc] : undefined
-  if (!entry) return { title: "Not found" }
+  if (!entry) return { title: "Non trovato" }
   return {
     title: entry.title,
     description: entry.summary,
-    robots: { index: false },
   }
 }
 
@@ -222,19 +158,19 @@ export default async function LegalPage({ params }: { params: Params }) {
     <div className="mx-auto flex w-full max-w-[1096px] flex-col gap-8 px-4 pt-10 md:pt-14">
       <div
         role="note"
-        className="flex items-start gap-3 rounded-2xl border border-[#ffbe4c]/30 bg-[#ffbe4c]/10 p-4 text-sm text-[#ffd98a]"
+        className="flex items-start gap-3 rounded-2xl border border-lime/30 bg-lime/10 p-4 text-sm text-foreground"
       >
-        <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
+        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-lime" aria-hidden />
         <p>
-          <strong className="font-semibold">
-            Placeholder — replace before launch.
+          <strong className="font-semibold text-lime">
+            Documentazione contrattuale {name}.
           </strong>{" "}
-          This text outlines how {name} works but has not been reviewed by a
-          lawyer.
+          Prima del lancio pubblico inserisci la ragione sociale, la Partita IVA
+          e il foro competente della tua attività.
         </p>
       </div>
 
-      <nav aria-label="Legal documents" className="flex flex-wrap gap-2">
+      <nav aria-label="Documenti legali" className="flex flex-wrap gap-2">
         {SLUGS.map((slug) => (
           <Link
             key={slug}
@@ -254,11 +190,11 @@ export default async function LegalPage({ params }: { params: Params }) {
       <div className="grid gap-10 lg:grid-cols-[220px_minmax(0,1fr)]">
         <aside className="hidden lg:block">
           <nav
-            aria-label="On this page"
+            aria-label="In questa pagina"
             className="sticky top-24 flex flex-col gap-1 text-sm"
           >
             <p className="mb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              On this page
+              Sezioni
             </p>
             {entry.sections.map((section) => (
               <a
@@ -278,7 +214,7 @@ export default async function LegalPage({ params }: { params: Params }) {
             </h1>
             <p className="text-base text-muted-foreground">{entry.summary}</p>
             <p className="text-xs text-white/40">
-              Last updated: not yet published
+              Versione aggiornata per il modello ibrido EUR · Ottobre 2026
             </p>
           </header>
           {entry.sections.map((section) => (

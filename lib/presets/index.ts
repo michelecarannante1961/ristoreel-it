@@ -7,7 +7,9 @@ import { findModel } from "@/generation/catalog"
 import { UserFacingError } from "@/lib/errors"
 import { collections, type PresetDoc } from "@/lib/db/collections"
 
-import { PRESET_LOOPS, PRESET_SEED } from "./seed-data"
+import { PRESET_LOOPS, PRESET_SEED, RESTAURANT_PRESET_SEED } from "./seed-data"
+import { env } from "@/lib/env"
+import { restaurantArea } from "@/lib/restaurant/catalog"
 
 export interface PresetView {
   id: string
@@ -26,6 +28,10 @@ export interface PresetView {
 }
 
 export function coverFor(slug: string): string {
+  if (slug.startsWith("risto-"))
+    return (
+      restaurantArea(slug.slice(6))?.cover ?? "/media/ristorazione/piatto.jpg"
+    )
   return `/media/presets/${slug}.jpg`
 }
 
@@ -51,7 +57,9 @@ function toView(doc: PresetDoc): PresetView {
 export async function seedPresets(): Promise<number> {
   const { presets } = await collections()
   let inserted = 0
-  for (const seed of PRESET_SEED) {
+  for (const seed of env().RESTAURANT_MODE
+    ? RESTAURANT_PRESET_SEED
+    : PRESET_SEED) {
     const now = new Date()
     const result = await presets.updateOne(
       { slug: seed.slug },
@@ -80,13 +88,17 @@ export async function listPresets(
 ): Promise<PresetView[]> {
   const { presets } = await collections()
   const docs = await presets
-    .find(options.includeInactive ? {} : { active: true })
+    .find({
+      ...(options.includeInactive ? {} : { active: true }),
+      ...(env().RESTAURANT_MODE ? { slug: /^risto-/ } : {}),
+    })
     .sort({ order: 1 })
     .toArray()
   return docs.filter((doc) => findModel(doc.modelId)).map(toView)
 }
 
 export async function getPreset(slug: string): Promise<PresetView | null> {
+  if (env().RESTAURANT_MODE && !slug.startsWith("risto-")) return null
   if (!/^[a-z0-9-]{1,80}$/.test(slug)) return null
   const { presets } = await collections()
   const doc = await presets.findOne({ slug, active: true })

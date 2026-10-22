@@ -38,9 +38,11 @@ next-env.d.ts
 # shadcn registry build output
 /public/r
 !.env.example
+!.env.hostinger.example
 
 # local data and references
 /.data
+/graphify-out
 /_reference
 /playwright-report
 /test-results

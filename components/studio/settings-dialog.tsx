@@ -72,6 +72,25 @@ export function SettingsDialog({
 }
 
 export function settingLabel(key: string): string {
+  const italian: Record<string, string> = {
+    aspectRatio: "Formato",
+    aspect_ratio: "Formato",
+    duration: "Durata",
+    resolution: "Risoluzione",
+    generateAudio: "Genera audio",
+    batchSize: "Numero di immagini",
+    quality: "Qualità",
+    negativePrompt: "Elementi da evitare",
+    seed: "Seme",
+    fps: "Fotogrammi al secondo",
+    enhancePrompt: "Migliora descrizione",
+    promptOptimizer: "Ottimizza descrizione",
+    sound: "Audio",
+    bitrateMode: "Qualità video",
+    mode: "Modalità",
+    format: "Formato file",
+  }
+  if (italian[key]) return italian[key]
   return key
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .replace(/_/g, " ")

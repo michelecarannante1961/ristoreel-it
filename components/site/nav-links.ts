@@ -1,49 +1,36 @@
-import { activeSurfaces } from "@/generation/catalog"
-
 export type NavLink = {
   href: string
   label: string
   match: (path: string) => boolean
 }
-
-/** Top navigation, in site order. Audio appears once an audio model exists. */
 export function navLinks(): NavLink[] {
-  const surfaces = activeSurfaces()
-  const links: NavLink[] = [
-    { href: "/", label: "Explore", match: (path) => path === "/" },
+  return [
+    { href: "/", label: "Esplora", match: (path) => path === "/" },
+    {
+      href: "/video",
+      label: "Studio video",
+      match: (path) => path.startsWith("/video"),
+    },
     {
       href: "/image",
-      label: "Image",
+      label: "Fotogrammi",
       match: (path) => path.startsWith("/image"),
     },
     {
-      href: "/video",
-      label: "Video",
-      match: (path) => path.startsWith("/video"),
+      href: "/assets",
+      label: "La mia libreria",
+      match: (path) =>
+        path.startsWith("/assets") || path.startsWith("/projects"),
     },
-  ]
-  if (surfaces.includes("audio"))
-    links.push({
-      href: "/audio",
-      label: "Audio",
-      match: (path) => path.startsWith("/audio"),
-    })
-  links.push(
     {
       href: "/effects",
-      label: "Effects",
+      label: "Stili e regia",
       match: (path) => path.startsWith("/effects"),
     },
     {
-      href: "/community",
-      label: "Community",
-      match: (path) => path.startsWith("/community") || path.startsWith("/g/"),
-    },
-    {
       href: "/pricing",
-      label: "Pricing",
+      label: "Prezzi",
       match: (path) => path.startsWith("/pricing"),
-    }
-  )
-  return links
+    },
+  ]
 }

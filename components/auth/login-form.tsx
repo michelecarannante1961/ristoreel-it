@@ -26,12 +26,36 @@ export function LoginForm({
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sentTo, setSentTo] = useState<string | null>(null)
+  const localDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true"
+  const enterDemo = async () => {
+    if (!sentTo || pending) return
+    setPending(true)
+    setError(null)
+    try {
+      const response = await fetch(
+        `/api/test/mailbox?to=${encodeURIComponent(sentTo)}`,
+        { cache: "no-store" }
+      )
+      if (!response.ok)
+        throw new Error("Accesso demo non disponibile su questo server.")
+      const result = (await response.json()) as { url?: string }
+      const link = result.url ? new URL(result.url) : null
+      if (!link || link.origin !== window.location.origin)
+        throw new Error("Collegamento di accesso non valido.")
+      window.location.assign(link.href)
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : "Accesso demo non riuscito."
+      )
+      setPending(false)
+    }
+  }
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (pending) return
     if (mode === "signup" && !consent) {
-      setError("Please accept the Terms and Privacy Policy to continue.")
+      setError("Accetta termini e informativa sulla privacy per continuare.")
       return
     }
     setPending(true)
@@ -49,13 +73,38 @@ export function LoginForm({
           <MailCheck className="size-6" />
         </span>
         <h2 className="text-3xl font-semibold tracking-tight">
-          Check your email
+          {localDemo ? "Accesso alla demo" : "Controlla la tua email"}
         </h2>
         <p className="text-sm text-muted-foreground">
-          We sent a sign-in link to{" "}
-          <span className="text-foreground">{sentTo}</span>. It expires in an
-          hour. You can close this window — the link brings you right back.
+          {localDemo ? (
+            <>
+              In questa anteprima non vengono inviate email. Puoi entrare con il
+              pulsante qui sotto usando{" "}
+              <span className="text-foreground">{sentTo}</span>.
+            </>
+          ) : (
+            <>
+              Abbiamo inviato un link di accesso a{" "}
+              <span className="text-foreground">{sentTo}</span>. Il link scade
+              tra un’ora.
+            </>
+          )}
         </p>
+        {localDemo ? (
+          <button
+            type="button"
+            disabled={pending}
+            className="btn-keycap w-full rounded-xl px-4 py-3 text-sm font-semibold"
+            onClick={() => void enterDemo()}
+          >
+            {pending ? "Accesso in corso…" : "Entra nella demo locale"}
+          </button>
+        ) : null}
+        {error ? (
+          <p role="alert" className="text-sm text-[#ff8fb3]">
+            {error}
+          </p>
+        ) : null}
         <button
           type="button"
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -64,7 +113,7 @@ export function LoginForm({
             setEmail("")
           }}
         >
-          <ArrowLeft className="size-4" /> Use a different email
+          <ArrowLeft className="size-4" /> Usa un’altra email
         </button>
       </div>
     )
@@ -74,13 +123,13 @@ export function LoginForm({
       <LogoMark className="size-8" />
       <div className="flex flex-col gap-1.5">
         <h2 className="text-[30px] leading-tight font-semibold tracking-tight">
-          {mode === "signup" ? `Welcome to ${BRAND.name}` : "Welcome back"}
+          {mode === "signup" ? `Benvenuto su ${BRAND.name}` : "Bentornato"}
         </h2>
         <p className="text-sm text-muted-foreground">
           {reason ??
             (mode === "signup"
-              ? "Sign up with your email — no password needed."
-              : "Sign in with a magic link sent to your email.")}
+              ? "Registrati con la tua email, senza password."
+              : "Accedi con un link inviato alla tua email.")}
         </p>
       </div>
       <label className="flex flex-col gap-2">
@@ -94,7 +143,7 @@ export function LoginForm({
           autoFocus
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          placeholder="you@example.com"
+          placeholder="nome@ristorante.it"
           className="h-12 rounded-xl border border-white/10 bg-surface px-4 text-base text-foreground placeholder:text-muted-foreground focus:border-lime/60 focus:outline-none"
         />
       </label>
@@ -102,25 +151,25 @@ export function LoginForm({
         <label className="flex items-start gap-3 text-sm text-muted-foreground">
           <input
             type="checkbox"
-            aria-label="I agree to the Terms of Service and Privacy Policy"
+            aria-label="Accetto i Termini di servizio and Informativa sulla privacy"
             checked={consent}
             onChange={(event) => setConsent(event.target.checked)}
-            className="mt-0.5 size-5 shrink-0 accent-[#d1fe17]"
+            className="mt-0.5 size-5 shrink-0 accent-[#e8a276]"
           />
           <span>
-            I agree to the{" "}
+            Accetto i{" "}
             <Link
               href="/legal/terms"
               className="text-foreground underline underline-offset-2"
             >
-              Terms of Service
+              Termini di servizio
             </Link>{" "}
             and{" "}
             <Link
               href="/legal/privacy"
               className="text-foreground underline underline-offset-2"
             >
-              Privacy Policy
+              Informativa sulla privacy
             </Link>
             .
           </span>
@@ -137,11 +186,11 @@ export function LoginForm({
         className="btn-keycap flex h-12 items-center justify-center gap-2 rounded-xl text-base font-semibold"
       >
         {pending ? <Loader2 className="size-4 animate-spin" /> : null}
-        {pending ? "Sending link…" : "Continue with email"}
+        {pending ? "Invio del link…" : "Continua con email"}
       </button>
       {onModeChange ? (
         <p className="text-center text-sm text-muted-foreground">
-          {mode === "signup" ? "Already have an account? " : "New here? "}
+          {mode === "signup" ? "Hai già un account? " : "Prima volta qui? "}
           <button
             type="button"
             className="font-medium text-lime hover:underline"
@@ -150,7 +199,7 @@ export function LoginForm({
               onModeChange(mode === "signup" ? "login" : "signup")
             }}
           >
-            {mode === "signup" ? "Log in" : "Create an account"}
+            {mode === "signup" ? "Accedi" : "Crea un account"}
           </button>
         </p>
       ) : null}

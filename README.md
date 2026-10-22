@@ -1,4 +1,15 @@
-# Vireo — AI image & video studio
+# RistoVideo — studio video per la ristorazione
+
+Specializzazione locale con 20 ambiti, 161 sottoargomenti e ricarico del 50%.
+Palette originale rame, antracite e crema. Video e crediti locali sono simulati.
+Avvio Windows dalla cartella superiore: `AVVIA-RISTOVIDEO.cmd`.
+Stato, limiti e configurazione: [docs/ristovideo.md](docs/ristovideo.md).
+
+Di seguito la documentazione tecnica originale di Vireo, conservata come riferimento.
+I suoi testi commerciali e le sue dichiarazioni di completezza non attestano lo
+stato della specializzazione RistoVideo o delle integrazioni reali.
+
+# Vireo — AI image & video studio (base originale)
 
 Vireo is a production-grade studio for generating images and video with every
 model the [Higgsfield REST API](https://docs.higgsfield.ai) exposes: Seedance,

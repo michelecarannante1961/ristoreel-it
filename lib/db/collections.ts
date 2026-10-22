@@ -5,6 +5,8 @@ import type { ObjectId } from "mongodb"
 import type { MediaKind, MediaRole, Surface } from "@/generation/catalog/types"
 import type { PlanId, BillingInterval } from "@/lib/billing/plans"
 import type { PriceRule } from "@/lib/billing/pricing-types"
+import type { RestaurantBrief } from "@/lib/restaurant/brief"
+import type { RestaurantBrandKit } from "@/lib/restaurant/brand-kit"
 
 import { db } from "./mongo"
 
@@ -34,6 +36,8 @@ export interface UserDoc {
   stripeSubscriptionId?: string
   /** Set when a charge was refunded after its credits were spent. */
   billingFlag?: { reason: string; at: Date }
+  /** Saved restaurant identity & signature references (Brand Kit). */
+  brandKit?: RestaurantBrandKit
   createdAt: Date
 }
 
@@ -94,6 +98,8 @@ export interface GenerationDoc {
   modelPath: string
   requestBody: Record<string, unknown>
   prompt: string
+  restaurant?: RestaurantBrief
+  sourcePrompt?: string
   settings: Record<string, unknown>
   media: GenerationMedia[]
   status: GenerationStatus

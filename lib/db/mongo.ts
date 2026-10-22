@@ -38,7 +38,7 @@ export function mongoClient(): Promise<MongoClient> {
   const cached = globalForMongo.__vireoMongo
   if (cached && cached.uri === target) return cached.promise
   const client = new MongoClient(target, {
-    appName: "vireo-studio",
+    appName: "ristoreel-studio",
     maxPoolSize: 20,
     serverSelectionTimeoutMS: 8_000,
   })

@@ -1,4 +1,5 @@
 import type { Surface } from "@/generation/catalog/types"
+import { RESTAURANT_AREAS } from "@/lib/restaurant/catalog"
 
 /**
  * Launch set of Effects presets. Each one is a prompt template plus a model
@@ -16,6 +17,20 @@ export interface PresetSeed {
   category: string
   order: number
 }
+
+export const RESTAURANT_PRESET_SEED: PresetSeed[] = RESTAURANT_AREAS.map(
+  (area, index) => ({
+    slug: `risto-${area.id}`,
+    title: area.title,
+    description: `${area.topics[0]}. ${area.topics[1] ?? ""}.`,
+    surface: "video",
+    modelId: "seedance-2.5",
+    promptTemplate: `Scena dedicata a un ristorante professionale, tema ${area.title}. {subject}. Movimenti di camera fluidi, luce naturale, gesti e alimenti credibili. Mantieni fedeltà alle fotografie fornite.`,
+    settings: { aspectRatio: "9:16", duration: 5, resolution: "720p" },
+    category: index % 2 ? "Motion" : "Cinematic",
+    order: index + 1,
+  })
+)
 
 /** Looping covers we generated for motion presets (image covers are /media/presets/<slug>.jpg). */
 export const PRESET_LOOPS: Record<string, string> = {

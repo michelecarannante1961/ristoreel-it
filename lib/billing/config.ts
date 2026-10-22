@@ -4,6 +4,7 @@ import type { CreditBucket } from "@/lib/db/collections"
 import { env } from "@/lib/env"
 
 import type { CreditConfig } from "./price"
+import { RESTAURANT_MARKUP } from "@/lib/restaurant/policy"
 
 /** Bucket behaviour (docs/decisions.md → Credits and pricing). */
 export const BILLING_FLAGS = {
@@ -20,5 +21,8 @@ export const BILLING_FLAGS = {
 
 export function creditConfig(): CreditConfig {
   const value = env()
-  return { markup: value.CREDIT_MARKUP, creditUsd: value.CREDIT_USD_VALUE }
+  return {
+    markup: value.RESTAURANT_MODE ? RESTAURANT_MARKUP : value.CREDIT_MARKUP,
+    creditUsd: value.CREDIT_USD_VALUE,
+  }
 }

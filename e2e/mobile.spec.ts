@@ -27,6 +27,6 @@ test("Generate stays reachable on the video generator at 390px", async ({
   await page.goto("/video")
   await dismissCookies(page)
   await expect(
-    page.getByRole("button", { name: /^Generate/ }).last()
+    page.getByRole("button", { name: /^Genera/ }).last()
   ).toBeInViewport()
 })
