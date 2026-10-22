@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# RISTOREEL (ristoreel.it) â€” ATTIVAZIONE AUTOMATICA HTTPS (CERTBOT + ARUBA DNS)
+# RISTOREEL (ristoreel.it) Ã¢â‚¬â€ ATTIVAZIONE AUTOMATICA HTTPS (CERTBOT + ARUBA DNS)
 # Attende che il DNS di Aruba punti a 72.62.156.177 e attiva subito HTTPS!
 # ==============================================================================
 set -euo pipefail
@@ -14,8 +14,19 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 echo "=================================================================="
-echo "  VERIFICA PROPAGAZIONE DNS ARUBA E ATTIVAZIONE HTTPS ($DOMAIN)"
+echo "  AGGIORNAMENTO GRAFICA HTTP + ATTIVAZIONE HTTPS ($DOMAIN)"
 echo "=================================================================="
+
+if [ -d "$APP_DIR/.git" ]; then
+  echo "Aggiornamento rapido grafica per accesso HTTP su IP ($SERVER_IP:3021)..."
+  cd "$APP_DIR"
+  git fetch origin main
+  git reset --hard origin/main
+  export NODE_OPTIONS="--dns-result-order=ipv4first --max-old-space-size=3072"
+  pnpm build
+  pm2 restart ristoreel-web
+  echo "Grafica su http://$SERVER_IP:3021 sistemata! Ricarica la pagina con CTRL+F5."
+fi
 
 for attempt in $(seq 1 60); do
   CURRENT_IP="$(curl -4 -fsSL "https://dns.google/resolve?name=$DOMAIN&type=A" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | tail -n 1 || true)"

@@ -7,6 +7,7 @@ syncModels()
 if (process.env.NODE_ENV === "development") watchModels()
 
 const isDev = process.env.NODE_ENV === "development"
+const isHttpsApp = (process.env.APP_URL ?? "").startsWith("https://")
 
 function origin(value: string | undefined): string | null {
   try {
@@ -48,7 +49,7 @@ function contentSecurityPolicy(): string {
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "object-src 'none'",
-    ...(isDev ? [] : ["upgrade-insecure-requests"]),
+    ...(isDev || !isHttpsApp ? [] : ["upgrade-insecure-requests"]),
   ].join("; ")
 }
 
@@ -61,7 +62,7 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), payment=(self)",
   },
-  ...(isDev
+  ...(isDev || !isHttpsApp
     ? []
     : [
         {

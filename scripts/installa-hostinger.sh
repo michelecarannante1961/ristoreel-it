@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# RISTOREEL (ristoreel.it) â€” INSTALLAZIONE AUTOMATICA SU HOSTINGER (72.62.156.177)
+# RISTOREEL (ristoreel.it) Ã¢â‚¬â€ INSTALLAZIONE AUTOMATICA SU HOSTINGER (72.62.156.177)
 # Fix IPv4 per registry.npmjs.org + abilitazione chiave SSH + avvio automatico
 # ==============================================================================
 set -euo pipefail
@@ -194,6 +194,7 @@ server {
     server_name $DOMAIN www.$DOMAIN;
 
     client_max_body_size 100M;
+    proxy_hide_header Strict-Transport-Security;
 
     location / {
         proxy_pass http://127.0.0.1:$APP_PORT;
