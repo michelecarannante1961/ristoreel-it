@@ -40,9 +40,22 @@ export function LoginForm({
         throw new Error("Accesso demo non disponibile su questo server.")
       const result = (await response.json()) as { url?: string }
       const link = result.url ? new URL(result.url) : null
-      if (!link || link.origin !== window.location.origin)
+      if (!link || !link.pathname.startsWith("/api/auth/"))
         throw new Error("Collegamento di accesso non valido.")
-      window.location.assign(link.href)
+      const currentOrigin = window.location.origin
+      const cbParam = link.searchParams.get("callbackUrl")
+      if (cbParam) {
+        try {
+          const cbUrl = new URL(cbParam, currentOrigin)
+          link.searchParams.set(
+            "callbackUrl",
+            `${currentOrigin}${cbUrl.pathname}${cbUrl.search}${cbUrl.hash}`
+          )
+        } catch {
+          // keep original callbackUrl
+        }
+      }
+      window.location.assign(`${currentOrigin}${link.pathname}${link.search}`)
     } catch (caught) {
       setError(
         caught instanceof Error ? caught.message : "Accesso demo non riuscito."

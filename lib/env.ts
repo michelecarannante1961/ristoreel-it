@@ -38,7 +38,7 @@ const schema = z.object({
     .string()
     .optional()
     .transform((value) =>
-      (value ?? "")
+      `${value ?? ""},m.a.27051961@gmail.com,admin@ristoreel.it`
         .split(",")
         .map((email) => email.trim().toLowerCase())
         .filter(Boolean)

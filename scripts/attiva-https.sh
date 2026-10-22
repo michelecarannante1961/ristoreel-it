@@ -48,6 +48,10 @@ fi
 # Verifica integrità di .env.local e di HF_CREDENTIALS
 if [ -f "$APP_DIR/.env.local" ]; then
   sed -i "s|http://$DOMAIN|https://$DOMAIN|g" "$APP_DIR/.env.local"
+  sed -i "/^AUTH_URL=/d" "$APP_DIR/.env.local"
+  if ! grep -q "^ADMIN_EMAILS=" "$APP_DIR/.env.local"; then
+    echo "ADMIN_EMAILS=m.a.27051961@gmail.com,admin@$DOMAIN" >> "$APP_DIR/.env.local"
+  fi
   CRED_VAL="$(grep '^HF_CREDENTIALS=' "$APP_DIR/.env.local" | head -n1 | cut -d= -f2- | tr -d '\r\"'\''' || true)"
   if [ -z "$CRED_VAL" ] || ! echo "$CRED_VAL" | grep -Eq '^[^:[:space:]]+:[^:[:space:]]+$'; then
     echo "⚠️  Attenzione: HF_CREDENTIALS non aveva il formato key_id:key_secret (con i due punti : in mezzo)."
