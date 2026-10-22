@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # ==============================================================================
 # RISTOREEL (ristoreel.it) â€” INSTALLAZIONE AUTOMATICA SU HOSTINGER (72.62.156.177)
 # Incolla nel terminale di Hostinger:
