@@ -57,7 +57,7 @@ export function ModelPicker({
   value,
   onChange,
   trigger,
-  title = "Choose a model",
+  title = "Scegli il modello AI",
 }: {
   models: ModelEntry[]
   value?: string
@@ -111,26 +111,26 @@ export function ModelPicker({
                 autoFocus
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search models…"
-                aria-label="Search models"
+                placeholder="Cerca modello…"
+                aria-label="Cerca modello"
                 className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
               />
             </label>
             <DialogPrimitive.Close
-              aria-label="Close"
+              aria-label="Chiudi"
               className="flex size-10 shrink-0 items-center justify-center rounded-[10px] border border-white/10 hover:bg-white/5"
             >
               <X className="size-4" />
             </DialogPrimitive.Close>
           </div>
           <DialogPrimitive.Description className="sr-only">
-            Pick the model for your next generation.
+            Scegli il modello AI per la tua prossima generazione.
           </DialogPrimitive.Description>
           <div className="flex-1 overflow-y-auto p-4">
             {!query && featured.length ? (
               <section className="mb-6">
                 <h3 className="mb-3 flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                  <Sparkle className="size-3 fill-lime text-lime" /> Featured
+                  <Sparkle className="size-3 fill-lime text-lime" /> In evidenza
                 </h3>
                 <div className="grid gap-3 sm:grid-cols-3">
                   {featured.map((model) => (
@@ -144,7 +144,7 @@ export function ModelPicker({
                       )}
                     >
                       <img
-                        src={familyCover(model.family, model.surface)}
+                        src={familyCover(model.family, model.surface, model.id)}
                         alt=""
                         className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
@@ -210,7 +210,7 @@ export function ModelPicker({
                           <span className="flex shrink-0 flex-col items-end gap-1">
                             {typeof from === "number" ? (
                               <span className="font-mono text-xs text-muted-foreground tabular-nums">
-                                from ✦{from}
+                                da ✦{from}
                               </span>
                             ) : null}
                             {selected ? (

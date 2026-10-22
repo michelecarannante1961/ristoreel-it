@@ -1,15 +1,17 @@
 "use client"
 
 /* eslint-disable @next/next/no-img-element */
-import { useState, type DragEvent } from "react"
+import { useRef, useState, type DragEvent } from "react"
 import {
   AudioLines,
   Check,
   Ellipsis,
+  ExternalLink,
   ImageIcon,
   Loader2,
   Play,
   Plus,
+  Upload,
   Video,
   X,
 } from "lucide-react"
@@ -56,10 +58,12 @@ export function slotRoles(model: ModelEntry, mode?: string): MediaRole[] {
 
 function slotHint(model: ModelEntry, role: MediaRole): string {
   if (role === "source")
-    return model.tab === "motion" ? "Video · 3–30 s" : "Video · up to 30 s"
+    return model.tab === "motion" ? "Video · 3–30 s" : "Video · fino a 30 s"
   if (role === "start")
-    return model.tab === "motion" ? "Image with visible face and body" : "Image"
-  if (role === "end") return "Optional · image"
+    return model.tab === "motion"
+      ? "Foto con soggetto ben visibile"
+      : "Foto dal PC o dal Catalogo Ristorante"
+  if (role === "end") return "Facoltativa · foto finale"
   return ROLE_KIND[role] === "audio" ? "Audio" : "Video"
 }
 
@@ -96,6 +100,8 @@ export function MediaZone({ generator }: { generator: Generator }) {
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
+  const directFileRef = useRef<HTMLInputElement>(null)
+  const directRoleRef = useRef<MediaRole | "auto">("start")
   if (!model) return null
 
   const modes = model.mediaModes ?? []
@@ -244,10 +250,10 @@ export function MediaZone({ generator }: { generator: Generator }) {
                             <Icon className="size-4 text-muted-foreground" />
                           </span>
                           <span className="text-sm font-medium text-white/80 first-letter:uppercase">
-                            {name}
+                            {role === "start" ? "Foto iniziale (Start frame)" : name}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {required ? "Required · " : ""}
+                            {required ? "Richiesta · " : "Facoltativa · "}
                             {slotHint(model, role)}
                           </span>
                         </>
@@ -255,6 +261,32 @@ export function MediaZone({ generator }: { generator: Generator }) {
                     </button>
                   }
                 />
+                {!item && ROLE_KIND[role] === "image" ? (
+                  <div className="mt-1.5 flex items-center justify-between gap-1.5">
+                    <button
+                      type="button"
+                      disabled={uploading}
+                      onClick={() => {
+                        directRoleRef.current = role
+                        directFileRef.current?.click()
+                      }}
+                      className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-white/10 bg-surface px-2 py-1.5 text-[11px] font-medium text-white/90 transition hover:border-[#e8a276] hover:text-[#e8a276]"
+                    >
+                      <Upload className="size-3" />
+                      {uploading ? "Caricamento…" : "Carica dal tuo PC"}
+                    </button>
+                    <a
+                      href="https://www.pexels.com/it-it/cerca/ristorante%20cibo%20chef/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-surface px-2 py-1.5 text-[11px] font-medium text-muted-foreground transition hover:border-[#e8a276] hover:text-white"
+                      title="Scarica foto gratuite di piatti e ristoranti da Pexels"
+                    >
+                      <ExternalLink className="size-3" />
+                      Foto gratis
+                    </a>
+                  </div>
+                ) : null}
                 {item ? (
                   <button
                     type="button"
@@ -416,6 +448,29 @@ export function MediaZone({ generator }: { generator: Generator }) {
           {localError}
         </p>
       ) : null}
+      <input
+        ref={directFileRef}
+        type="file"
+        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={async (event) => {
+          const file = event.target.files?.[0]
+          event.target.value = ""
+          if (!file) return
+          setUploading(true)
+          setLocalError(null)
+          try {
+            const uploaded = await library.onUpload(file)
+            generator.addMedia(directRoleRef.current, [uploaded])
+          } catch (caught) {
+            setLocalError(
+              caught instanceof Error ? caught.message : "Caricamento non riuscito."
+            )
+          } finally {
+            setUploading(false)
+          }
+        }}
+      />
     </div>
   )
 }

@@ -3,8 +3,6 @@
 //   https://docs.higgsfield.ai/docs/models/hailuo-2-3
 //   https://docs.higgsfield.ai/docs/models/hailuo-2-3/standard-text-to-video
 //   https://docs.higgsfield.ai/docs/models/hailuo-2-3/standard-image-to-video
-// Output is fixed at 768p: these endpoints have no resolution or aspect_ratio
-// field.
 import { compact, first, int, requirePrompt } from "../mappers"
 import type { ModelEntry } from "../types"
 
@@ -18,24 +16,35 @@ const hailuo23: ModelEntry = {
   icon: "minimax",
   label: "Hailuo 2.3",
   description:
-    "Budget-friendly 768p clips with convincing real-world physics, from a prompt or a start frame. No sound.",
-  bestFor: "Cheap clips with natural physics",
+    "Clip economiche a 768p con movimenti realistici da testo o da foto iniziale.",
+  bestFor: "Clip economiche con fisica naturale",
   category: "GENERAL",
   roles: { start: 1 },
   requirePrompt: true,
   settings: {
+    aspectRatio: {
+      type: "enum",
+      values: ["16:9", "9:16", "1:1"],
+      default: "16:9",
+      label: "Formato",
+      labels: {
+        "16:9": "16:9",
+        "9:16": "9:16",
+        "1:1": "1:1",
+      },
+    },
     duration: {
       type: "enum",
       values: ["6", "10"],
       default: "6",
-      label: "Duration",
+      label: "Durata",
       labels: { "6": "6s", "10": "10s" },
     },
     promptOptimizer: {
       type: "boolean",
       default: true,
-      label: "Enhance prompt",
-      hint: "Refines the prompt before generating.",
+      label: "Migliora prompt",
+      hint: "Rifinisci automaticamente il prompt prima di generare.",
     },
   },
   enhanceSetting: "promptOptimizer",

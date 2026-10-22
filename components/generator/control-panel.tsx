@@ -42,7 +42,8 @@ export function ModelCard({ generator }: { generator: Generator }) {
   const { model, preset } = generator
   if (!model) return null
   const loop = FAMILY_LOOPS[model.family]
-  const cover = preset?.coverUrl ?? familyCover(model.family, model.surface)
+  const cover =
+    preset?.coverUrl ?? familyCover(model.family, model.surface, model.id)
   return (
     <div className="relative h-[131px] shrink-0 overflow-hidden rounded-xl bg-surface">
       {(preset?.coverVideoUrl ?? (!preset ? loop : undefined)) ? (
@@ -335,14 +336,19 @@ export function ControlPanel({ generator }: { generator: Generator }) {
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-2 pb-4">
         <RestaurantBriefCard generator={generator} />
         <ModelCard generator={generator} />
+        <div className="flex flex-col gap-1.5 rounded-2xl bg-surface/60 p-2.5">
+          <span className="px-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+            Formato (9:16 / 16:9), durata e qualità
+          </span>
+          <SettingsRow
+            model={model as ModelEntry}
+            values={generator.settings}
+            onChange={generator.setSetting}
+          />
+        </div>
         <MediaZone generator={generator} />
         <PromptCard generator={generator} />
         <ModelRow generator={generator} />
-        <SettingsRow
-          model={model as ModelEntry}
-          values={generator.settings}
-          onChange={generator.setSetting}
-        />
         {generator.error ? (
           <p
             role="alert"

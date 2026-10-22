@@ -1,11 +1,9 @@
-// Kling 2.5 Turbo — Pro (text or start frame) and Standard (start frame).
+// Kling 2.5 Turbo — Pro (text or start frame) and Standard (start frame or text fallback).
 // Sources:
 //   https://docs.higgsfield.ai/docs/models/kling-2-5-turbo
 //   https://docs.higgsfield.ai/docs/models/kling-2-5-turbo/pro-text-to-video
 //   https://docs.higgsfield.ai/docs/models/kling-2-5-turbo/pro-image-to-video
 //   https://docs.higgsfield.ai/docs/models/kling-2-5-turbo/standard-image-to-video
-// These endpoints have no sound or aspect_ratio field. Not exposed:
-// negative_prompt.
 import { compact, first, int, requirePrompt } from "../mappers"
 import type { GenerationPlane, ModelEntry } from "../types"
 
@@ -19,11 +17,22 @@ const meta = {
   roles: { start: 1 },
   requirePrompt: true,
   settings: {
+    aspectRatio: {
+      type: "enum",
+      values: ["16:9", "9:16", "1:1"],
+      default: "16:9",
+      label: "Formato",
+      labels: {
+        "16:9": "16:9",
+        "9:16": "9:16",
+        "1:1": "1:1",
+      },
+    },
     duration: {
       type: "enum",
       values: ["5", "10"],
       default: "5",
-      label: "Duration",
+      label: "Durata",
       labels: { "5": "5s", "10": "10s" },
     },
     cfgScale: {
@@ -32,8 +41,8 @@ const meta = {
       max: 1,
       step: 0.1,
       default: 0.5,
-      label: "Prompt adherence",
-      hint: "Higher follows the prompt more literally.",
+      label: "Fedeltà al prompt",
+      hint: "Più alto = segue il testo in modo più letterale.",
     },
   },
 } satisfies Partial<ModelEntry>
@@ -51,8 +60,8 @@ export const kling25Turbo: ModelEntry = {
   id: "kling-2.5-turbo",
   label: "Kling 2.5 Turbo Pro",
   description:
-    "Snappy, affordable Kling clips from a prompt or a start frame, without sound.",
-  bestFor: "Quick silent clips",
+    "Clip veloci e convenienti da testo o da foto iniziale (senza audio).",
+  bestFor: "Clip veloci ed economiche da testo o foto",
   badges: ["FAST", "PRO"],
   category: "FAST",
   order: 170,
@@ -74,19 +83,23 @@ export const kling25TurboStd: ModelEntry = {
   id: "kling-2.5-turbo-std",
   label: "Kling 2.5 Turbo",
   description:
-    "The cheapest way to bring a still to life: animate a start frame into a 5 or 10 s silent clip.",
-  bestFor: "Low-cost image animation",
+    "Il modo più economico per animare una foto o generare una clip veloce da 5 o 10 secondi.",
+  bestFor: "Animazione foto o clip veloce a basso costo",
   badges: ["FAST"],
   category: "FAST",
-  requiredRoles: ["start"],
   order: 171,
-  docs: [DOCS, `${DOCS}/standard-image-to-video`],
+  docs: [DOCS, `${DOCS}/standard-image-to-video`, `${DOCS}/pro-text-to-video`],
   toPlatform: (plane) => {
     const start = first(plane, "start")
-    if (!start) throw new Error("Add a start frame to use Kling 2.5 Turbo.")
+    const body = turboBody(plane, "Kling 2.5 Turbo")
+    if (start)
+      return {
+        path: "kling-video/v2.5-turbo/standard/image-to-video",
+        body: { ...body, image_url: start },
+      }
     return {
-      path: "kling-video/v2.5-turbo/standard/image-to-video",
-      body: { ...turboBody(plane, "Kling 2.5 Turbo"), image_url: start },
+      path: "kling-video/v2.5-turbo/pro/text-to-video",
+      body,
     }
   },
 }

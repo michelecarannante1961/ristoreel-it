@@ -43,6 +43,14 @@ const ICONS: Record<string, ReactNode> = {
   quality: <Sparkles className="size-4" />,
 }
 
+const ASPECT_HINT: Record<string, string> = {
+  "16:9": "16:9 (Orizzontale)",
+  "9:16": "9:16 (Verticale Reel)",
+  "1:1": "1:1 (Quadrato)",
+  "4:3": "4:3 (Classico)",
+  "3:4": "3:4 (Verticale)",
+}
+
 export function displaySetting(field: SettingField, value: unknown): string {
   if (field.type === "enum") {
     const raw = typeof value === "string" ? value : field.default
@@ -122,7 +130,9 @@ export function SettingTile({
             <SelectItem key={option} value={option}>
               {name === "aspectRatio" ? <AspectGlyph ratio={option} /> : null}
               <SelectItemText>
-                {field.labels?.[option] ?? option}
+                {name === "aspectRatio"
+                  ? (ASPECT_HINT[option] ?? field.labels?.[option] ?? option)
+                  : (field.labels?.[option] ?? option)}
               </SelectItemText>
             </SelectItem>
           ))}

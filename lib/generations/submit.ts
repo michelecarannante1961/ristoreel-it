@@ -61,7 +61,7 @@ export const submitSchema = z.object({
     .array(
       z.object({
         role: z.enum(["start", "end", "reference", "video", "audio", "source"]),
-        url: z.url().max(2048),
+        url: z.string().min(1).max(2048),
         name: z.string().max(200).optional(),
       })
     )
