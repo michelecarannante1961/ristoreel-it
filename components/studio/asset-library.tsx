@@ -493,10 +493,11 @@ function ElementCard({
           </span>
         ) : item.kind === "video" ? (
           <video
-            src={item.src}
+            src={item.src + "#t=0.001"}
+            poster={item.poster || "/media/ristorazione/cucina.jpg"}
             muted
             playsInline
-            preload="metadata"
+            preload="auto"
             className="size-full object-cover"
           />
         ) : (

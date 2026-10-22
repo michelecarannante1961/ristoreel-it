@@ -17,6 +17,7 @@ export interface AssetSelection {
   kind: AssetKind
   name?: string
   durationSec?: number
+  poster?: string
 }
 
 export interface AssetLibraryItem extends AssetSelection {

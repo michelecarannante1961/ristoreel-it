@@ -166,9 +166,9 @@ export function Canvas({
   const { runs, surface, tab } = generator
   const [chosen, setView] = useState<"history" | "how" | null>(null)
   const [filter, setFilter] = useState<"all" | "completed" | "failed">("all")
-  const hasHistory = runs.records.length > 0
-  // History as soon as there's something in it, unless the user picked a view.
-  const view = chosen ?? (hasHistory ? "history" : "how")
+  const hasCompletedHistory = runs.records.some((run) => run.status === "completed")
+  // Show HowItWorks (with pasta demo videos and prompt button) by default unless user has completed videos!
+  const view = chosen ?? (hasCompletedHistory ? "history" : "how")
 
   const items = useMemo(() => {
     const filtered = runs.records.filter((run) =>
@@ -193,8 +193,8 @@ export function Canvas({
     >
       {(
         [
+          ["how", "Come funziona & Video Demo", BookOpen],
           ["history", "I tuoi video", FolderClosed],
-          ["how", "Come funziona", BookOpen],
         ] as const
       ).map(([value, label, Icon]) => (
         <button

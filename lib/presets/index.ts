@@ -36,6 +36,7 @@ export function coverFor(slug: string): string {
 }
 
 function toView(doc: PresetDoc): PresetView {
+  const dynamicCover = coverFor(doc.slug)
   return {
     id: doc._id.toHexString(),
     slug: doc.slug,
@@ -46,7 +47,7 @@ function toView(doc: PresetDoc): PresetView {
     modelLabel: findModel(doc.modelId)?.label ?? doc.modelId,
     promptTemplate: doc.promptTemplate,
     settings: doc.settings,
-    coverUrl: doc.coverUrl,
+    coverUrl: dynamicCover || doc.coverUrl,
     ...(doc.coverVideoUrl ? { coverVideoUrl: doc.coverVideoUrl } : {}),
     category: doc.category,
     active: doc.active,
@@ -61,18 +62,28 @@ export async function seedPresets(): Promise<number> {
     ? RESTAURANT_PRESET_SEED
     : PRESET_SEED) {
     const now = new Date()
+    const cover = coverFor(seed.slug)
     const result = await presets.updateOne(
       { slug: seed.slug },
       {
         $setOnInsert: {
           _id: new ObjectId(),
-          ...seed,
-          coverUrl: coverFor(seed.slug),
+          createdAt: now,
+        },
+        $set: {
+          title: seed.title,
+          description: seed.description,
+          surface: seed.surface,
+          modelId: seed.modelId,
+          promptTemplate: seed.promptTemplate,
+          settings: seed.settings,
+          category: seed.category,
+          order: seed.order,
+          coverUrl: cover,
           ...(PRESET_LOOPS[seed.slug]
             ? { coverVideoUrl: PRESET_LOOPS[seed.slug] }
             : {}),
           active: true,
-          createdAt: now,
           updatedAt: now,
         },
       },

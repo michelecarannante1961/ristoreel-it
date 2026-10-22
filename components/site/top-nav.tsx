@@ -55,7 +55,7 @@ export function TopNav({ compact = false }: { compact?: boolean }) {
       ) : null}
       <nav
         aria-label="Main"
-        className="hidden min-w-0 flex-1 items-center gap-1 md:flex"
+        className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto scrollbar-none py-1"
       >
         {links.map((link) => {
           const active = link.match(pathname)
@@ -65,9 +65,9 @@ export function TopNav({ compact = false }: { compact?: boolean }) {
               href={link.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "rounded-lg px-2 py-1 text-sm font-medium whitespace-nowrap transition-colors duration-200",
+                "shrink-0 rounded-lg px-2.5 py-1 text-xs md:text-sm font-medium whitespace-nowrap transition-colors duration-200",
                 active
-                  ? "text-lime"
+                  ? "bg-white/10 text-lime font-semibold"
                   : "text-[#a8a8a8] hover:bg-white/5 hover:text-white"
               )}
             >
