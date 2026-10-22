@@ -49,10 +49,29 @@ const schema = z.object({
   MONGODB_DB: z.string().default("ristoreel-studio"),
 
   HF_API_BASE_URL: z.url().default("https://api.higgsfield.ai"),
-  HF_CREDENTIALS: optionalString.refine(
-    (value) => value === undefined || /^[^:\s]+:[^:\s]+$/.test(value),
-    "HF_CREDENTIALS must be key_id:key_secret"
-  ),
+  HF_CREDENTIALS: optionalString
+    .transform((value) => {
+      if (!value) return undefined
+      const cleaned = value
+        .replace(/^['"]|['"]$/g, "")
+        .replace(/^(Key|Bearer)\s+/i, "")
+        .trim()
+      if (
+        process.env.NODE_ENV !== "production" &&
+        process.env.NODE_ENV !== "test" &&
+        !/^[^:\s]+:[^:\s]+$/.test(cleaned)
+      ) {
+        console.warn(
+          "[env] HF_CREDENTIALS non ha il formato key_id:key_secret -> fallback temporaneo a mock:mock"
+        )
+        return "mock:mock"
+      }
+      return cleaned
+    })
+    .refine(
+      (value) => value === undefined || /^[^:\s]+:[^:\s]+$/.test(value),
+      "HF_CREDENTIALS must be key_id:key_secret"
+    ),
   HF_WEBHOOK_SECRET: optionalString,
   HF_WEBHOOK_BASE_URL: optionalString,
   HF_PRICE_GUARD: bool(true),
