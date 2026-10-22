@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 import { useMemo, useState } from "react"
-import { BookOpen, FolderClosed, Loader2 } from "lucide-react"
+import { BookOpen, FolderClosed, Loader2, Sparkles } from "lucide-react"
 
 import { SoundVideo } from "@/components/media/sound-video"
 import { useApp } from "@/components/providers/app-providers"
@@ -54,9 +54,11 @@ const HEADLINE: Record<Surface, Record<GeneratorTab, [string, string]>> = {
 export function HowItWorks({
   surface,
   tab,
+  generator,
 }: {
   surface: Surface
   tab: GeneratorTab
+  generator?: Generator
 }) {
   const [title, subtitle] = HEADLINE[surface][tab]
   const steps = STEPS[surface]
@@ -109,6 +111,44 @@ export function HowItWorks({
           </div>
         ))}
       </div>
+
+      {surface === "video" && (
+        <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-black/40 to-amber-500/5 p-5 md:p-6 text-left">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2 max-w-2xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-semibold text-amber-300">
+                  <Sparkles className="size-3.5" /> Prompt di Esempio • Video Demo
+                </span>
+                <span className="text-xs text-white/50">
+                  Confronta: Passo 1 (Muto) vs Passo 3 (Audio ed Effetti)
+                </span>
+              </div>
+              <h3 className="font-display text-lg text-white">
+                Chef in Azione: Padella Saltata & Fiamma Viva
+              </h3>
+              <p className="text-xs text-white/90 leading-relaxed italic bg-black/50 p-3 rounded-lg border border-white/10 font-mono">
+                &ldquo;Uno chef italiano in divisa nera salta la pasta in una padella di rame su fiamma viva nella cucina professionale del ristorante. Scintille leggere, vapore profumato, salsa cremosa che avvolge la pasta, gesti precisi ed eleganti. Luce calda cinematografica, ripresa ravvicinata a rallentatore.&rdquo;
+              </p>
+            </div>
+            {generator ? (
+              <button
+                type="button"
+                onClick={() => {
+                  generator.setPrompt(
+                    "Uno chef italiano in divisa nera salta la pasta in una padella di rame su fiamma viva nella cucina professionale del ristorante. Scintille leggere, vapore profumato, salsa cremosa che avvolge la pasta, gesti precisi ed eleganti. Luce calda cinematografica, ripresa ravvicinata a rallentatore."
+                  )
+                  generator.setSetting("generateAudio", true)
+                }}
+                className="shrink-0 self-start md:self-center inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold px-4 py-2.5 text-xs shadow-lg transition-all"
+              >
+                <Sparkles className="size-4" />
+                Usa questo prompt nello Studio (con audio)
+              </button>
+            ) : null}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -191,7 +231,7 @@ export function Canvas({
             className="min-h-0 flex-1 overflow-y-auto"
             style={{ paddingBottom: bottomInset }}
           >
-            <HowItWorks surface={surface} tab={tab} />
+            <HowItWorks surface={surface} tab={tab} generator={generator} />
           </div>
         </>
       ) : (
@@ -222,14 +262,14 @@ export function Canvas({
             actions={actions}
             emptyState={
               !user ? (
-                <HowItWorks surface={surface} tab={tab} />
+                <HowItWorks surface={surface} tab={tab} generator={generator} />
               ) : !runs.loaded ? (
                 <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                   <Loader2 className="mr-2 size-4 animate-spin" /> Caricamento
                   dei tuoi video…
                 </div>
               ) : (
-                <HowItWorks surface={surface} tab={tab} />
+                <HowItWorks surface={surface} tab={tab} generator={generator} />
               )
             }
           />

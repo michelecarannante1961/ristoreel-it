@@ -26,7 +26,7 @@ export type ResolvedMedia = MediaItem & {
 }
 
 const BUILTIN_STOCK_PATH =
-  /^\/media\/ristorazione\/(ambito-[0-9]{2}\.(jpg|mp4)|chef-regia\.mp4|piatto\.jpg|cucina\.jpg|sala\.jpg|vino\.jpg|ingredienti\.jpg)$/
+  /^\/media\/ristorazione\/(ambito-[0-9]{2}\.(jpg|mp4)|chef-regia\.mp4|chef-pasta-audio\.mp4|chef-pasta-muto\.mp4|piatto\.jpg|cucina\.jpg|sala\.jpg|vino\.jpg|ingredienti\.jpg)$/
 
 function resolveBuiltinStock(rawUrl: string): {
   pathname: string

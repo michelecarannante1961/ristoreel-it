@@ -231,6 +231,20 @@ const STOCK_ITEMS: Omit<AssetLibraryItem, "createdAt">[] = [
     name: "Video 03 · Brigata in Cucina",
     source: "generation",
   },
+  {
+    id: "stock-chef-pasta-audio",
+    src: "/media/ristorazione/chef-pasta-audio.mp4",
+    kind: "video",
+    name: "Chef Salta la Pasta (con Effetti Audio)",
+    source: "generation",
+  },
+  {
+    id: "stock-chef-pasta-muto",
+    src: "/media/ristorazione/chef-pasta-muto.mp4",
+    kind: "video",
+    name: "Chef Salta la Pasta (Silenzioso/Muto)",
+    source: "generation",
+  },
 ]
 
 export const RESTAURANT_STOCK_LIBRARY: AssetLibraryItem[] = STOCK_ITEMS.map(
@@ -272,9 +286,10 @@ export type StepItem = {
 export const STEPS: Record<"video" | "image" | "audio", readonly StepItem[]> = {
   video: [
     {
-      title: "Aggiungi i tuoi materiali",
-      body: "Carica una foto reale del piatto, della cucina o del locale.",
+      title: "Video muto o fotogramma",
+      body: "Genera clip rapide silenziose o anima una foto del locale.",
       image: "/media/ristorazione/ambito-16.jpg",
+      video: "/media/ristorazione/chef-pasta-muto.mp4",
     },
     {
       title: "Scegli la tua regia",
@@ -283,9 +298,10 @@ export const STEPS: Record<"video" | "image" | "audio", readonly StepItem[]> = {
       video: "/media/ristorazione/chef-regia.mp4",
     },
     {
-      title: "Controlla e genera",
-      body: "Verifica il preventivo: la clip sarà disponibile tra i tuoi video.",
+      title: "Audio ed effetti immersivi",
+      body: "Aggiungi suoni reali di cucina, padelle e atmosfera del locale.",
       image: "/media/ristorazione/ambito-04.jpg",
+      video: "/media/ristorazione/chef-pasta-audio.mp4",
     },
   ],
   image: [

@@ -55,7 +55,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Standardizzazione delle ricette",
     ],
     cover: "/media/ristorazione/cucina.jpg",
-    video: "/media/ristorazione/ambito-03.mp4",
+    video: "/media/ristorazione/chef-pasta-audio.mp4",
   },
   {
     id: "sala",

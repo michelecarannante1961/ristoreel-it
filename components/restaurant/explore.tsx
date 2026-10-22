@@ -31,12 +31,12 @@ const inspirations = [
   {
     area: "cucina",
     title: "Dietro ogni servizio.",
-    subtitle: "Il lavoro della tua brigata",
+    subtitle: "Lo chef salta la pasta ai fornelli",
     image: "cucina",
-    video: "/media/ristorazione/ambito-03.mp4",
-    badge: "DIETRO LE QUINTE",
+    video: "/media/ristorazione/chef-pasta-audio.mp4",
+    badge: "CON AUDIO & EFFETTI",
     large: false,
-    idea: "Lo chef e la brigata preparano la mise en place prima del servizio: mani al lavoro, ingredienti freschi, cucina ordinata.",
+    idea: "Uno chef italiano in divisa nera salta la pasta in una padella di rame su fiamma viva nella cucina professionale del ristorante. Scintille leggere, vapore profumato, salsa cremosa che avvolge la pasta, gesti precisi ed eleganti. Luce calda cinematografica, ripresa ravvicinata a rallentatore.",
   },
   {
     area: "food-cost",
