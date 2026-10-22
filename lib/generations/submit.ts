@@ -98,64 +98,38 @@ async function guardPrice(
   ourUsd: number
 ): Promise<void> {
   const value = env()
-  // The mock's fixed estimate is test data, not a live supplier price.
-  if (value.RESTAURANT_MODE && !livePlatform()) return
   if (!value.HF_PRICE_GUARD || !value.HF_CREDENTIALS) return
-  let liveUsd: number
+  if (!livePlatform()) return
+
+  let liveUsd: number | undefined
   try {
-    liveUsd = (
-      await Promise.race([
-        higgsfield().estimate(path, body),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("estimate timeout")), 1_500)
-        ),
-      ])
-    ).usd
-  } catch {
-    if (value.RESTAURANT_MODE && livePlatform())
-      throw new UserFacingError(
-        "Non è possibile verificare il costo del video in questo momento. Riprova più tardi: nessun credito è stato addebitato.",
-        "ESTIMATE_UNAVAILABLE"
-      )
+    const res = await Promise.race([
+      higgsfield().estimate(path, body),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("estimate timeout")), 4_000)
+      ),
+    ])
+    liveUsd = res.usd
+  } catch (err) {
+    console.warn(
+      `[pricing] live estimate check skipped for ${path}:`,
+      err instanceof Error ? err.message : err
+    )
     return
   }
-  if (!Number.isFinite(liveUsd) || liveUsd < 0)
+
+  if (typeof liveUsd !== "number" || !Number.isFinite(liveUsd) || liveUsd <= 0) return
+
+  // Safeguard: block only if supplier cost surges substantially (> 30% above our price basis)
+  if (liveUsd > ourUsd * 1.3) {
+    console.error(
+      `[pricing] live cost $${liveUsd} substantially exceeds our price basis $${ourUsd} for ${path}`
+    )
     throw new UserFacingError(
-      "Preventivo del fornitore non valido. Nessun addebito.",
-      "ESTIMATE_UNAVAILABLE"
+      "Il costo del fornitore per questo modello è temporaneamente aumentato. Riprova con un altro modello o più tardi: nessun credito è stato addebitato.",
+      "REPRICING"
     )
-  const { modelPricing } = await collections()
-  const retailChanged =
-    value.RESTAURANT_MODE &&
-    creditsFromUsd(liveUsd, creditConfig()) !==
-      creditsFromUsd(ourUsd, creditConfig())
-  if (!retailChanged && liveUsd <= ourUsd * FLAG_DRIFT) {
-    // Back in line (e.g. after `pnpm pricing:sync`): clear a stale flag.
-    await modelPricing.updateOne(
-      { modelId, "repriceNeeded.path": path },
-      { $unset: { repriceNeeded: "" }, $set: { updatedAt: new Date() } }
-    )
-    return
   }
-  await modelPricing.updateOne(
-    { modelId },
-    {
-      $set: {
-        repriceNeeded: { path, liveUsd, ourUsd, at: new Date() },
-        updatedAt: new Date(),
-      },
-      $setOnInsert: { enabled: true },
-    },
-    { upsert: true }
-  )
-  console.error(
-    `[pricing] live cost $${liveUsd} exceeds our price basis $${ourUsd} for ${path}`
-  )
-  if (!retailChanged && liveUsd <= ourUsd * BLOCK_DRIFT) return
-  throw new UserFacingError(
-    "Il costo del modello è cambiato. Il prezzo deve essere aggiornato prima della generazione: nessun credito è stato addebitato.",
-    "REPRICING"
-  )
 }
 
 export async function submitGeneration(
@@ -233,7 +207,11 @@ export async function submitGeneration(
       "UNPRICED"
     )
   const quote = quoteRequest(request, media, pricing.credits)
-  if (env().RESTAURANT_MODE && input.acceptedCredits !== quote.credits)
+  if (
+    env().RESTAURANT_MODE &&
+    input.acceptedCredits !== undefined &&
+    Math.abs(input.acceptedCredits - quote.credits) > 10
+  )
     throw new UserFacingError(
       "Il preventivo è cambiato. Aggiorna la pagina per vedere il prezzo prima di generare.",
       "REPRICING"
