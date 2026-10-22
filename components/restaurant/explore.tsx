@@ -22,7 +22,8 @@ const inspirations = [
     title: "Il piatto diventa protagonista.",
     subtitle: "Racconta il tuo menù",
     image: "piatto",
-    badge: "FOOD STORIES",
+    video: "/media/ristorazione/hero-reel.mp4",
+    badge: "REEL IN MOVIMENTO",
     large: true,
     idea: "Un primo piano del nostro piatto del giorno appena impiattato, vapore naturale e luce calda. La camera si avvicina lentamente al piatto sul pass.",
   },
@@ -31,6 +32,7 @@ const inspirations = [
     title: "Dietro ogni servizio.",
     subtitle: "Il lavoro della tua brigata",
     image: "cucina",
+    video: "/media/ristorazione/demo.mp4",
     badge: "DIETRO LE QUINTE",
     large: false,
     idea: "Lo chef e la brigata preparano la mise en place prima del servizio: mani al lavoro, ingredienti freschi, cucina ordinata.",
@@ -124,11 +126,24 @@ export function RestaurantExplore() {
               href={studioHref(item.area, purpose, item.idea)}
               className={`risto-story ${item.large ? "risto-story-large" : ""}`}
             >
-              <img
-                src={`/media/ristorazione/${item.image}.jpg`}
-                alt={item.subtitle}
-                fetchPriority={item.large ? "high" : "auto"}
-              />
+              {item.video ? (
+                <video
+                  src={item.video}
+                  poster={`/media/ristorazione/${item.image}.jpg`}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  aria-label={item.subtitle}
+                />
+              ) : (
+                <img
+                  src={`/media/ristorazione/${item.image}.jpg`}
+                  alt={item.subtitle}
+                  fetchPriority={item.large ? "high" : "auto"}
+                />
+              )}
               <div className="risto-story-shade" />
               <span className="risto-story-badge">{item.badge}</span>
               <span className="risto-story-arrow">
@@ -224,7 +239,19 @@ export function RestaurantExplore() {
                   className="risto-area-cover"
                   href={studioHref(area.id, purpose)}
                 >
-                  <img src={area.cover} alt="" loading="lazy" />
+                  {area.video ? (
+                    <video
+                      src={area.video}
+                      poster={area.cover}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
+                    />
+                  ) : (
+                    <img src={area.cover} alt="" loading="lazy" />
+                  )}
                   <span>{String(area.number).padStart(2, "0")}</span>
                   <span className="risto-area-go">
                     <ArrowUpRight size={18} />

@@ -4,6 +4,7 @@ export type RestaurantArea = {
   title: string
   topics: readonly string[]
   cover: string
+  video?: string
 }
 
 export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
@@ -21,6 +22,7 @@ export const RESTAURANT_AREAS: readonly RestaurantArea[] = [
       "Scelta dei piatti da eliminare o valorizzare",
     ],
     cover: "/media/ristorazione/piatto.jpg",
+    video: "/media/ristorazione/hero-reel.mp4",
   },
   {
     id: "food-cost",
