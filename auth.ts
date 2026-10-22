@@ -102,6 +102,27 @@ function config(): NextAuthConfig {
       error: "/login/error",
     },
     callbacks: {
+      redirect({ url, baseUrl }) {
+        const publicOrigin = env().APP_URL.replace(/\/$/, "")
+        const safeBase =
+          baseUrl.includes("0.0.0.0") || baseUrl.includes("127.0.0.1")
+            ? publicOrigin
+            : baseUrl
+        if (url.startsWith("/")) return `${safeBase}${url}`
+        try {
+          const parsed = new URL(url)
+          if (
+            parsed.hostname === "ristoreel.it" ||
+            parsed.hostname === "www.ristoreel.it" ||
+            parsed.origin === safeBase
+          ) {
+            return url
+          }
+        } catch {
+          // ignore invalid url
+        }
+        return safeBase
+      },
       session({ session, user }) {
         const stored = user as AdapterUser & { role?: Role }
         const admin =
