@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # RISTOREEL (ristoreel.it) â€” INSTALLAZIONE AUTOMATICA SU HOSTINGER (72.62.156.177)
-# Incolla nel terminale di Hostinger:
-#   curl -fsSL https://raw.githubusercontent.com/michelecarannante1961/ristoreel-it/main/scripts/installa-hostinger.sh | sudo bash
+# Fix IPv4 per registry.npmjs.org + abilitazione chiave SSH + avvio automatico
 # ==============================================================================
 set -euo pipefail
 
@@ -20,13 +19,30 @@ echo "  INSTALLAZIONE AUTOMATICA RISTOREEL ($DOMAIN -> $SERVER_IP)"
 echo "=================================================================="
 
 if [ "$(id -u)" -ne 0 ]; then
-  echo "Eseguo con privilegi root (sudo)..."
   exec sudo bash "$0" "$@"
 fi
 
 export DEBIAN_FRONTEND=noninteractive
 
-echo "[1/7] Verifica pacchetti di sistema (curl, git, nginx, certbot, build-essential)..."
+# 0. Abilita accesso SSH diretto dal PC di sviluppo (cosi' posso aiutarti direttamente)
+mkdir -p /root/.ssh
+chmod 700 /root/.ssh
+touch /root/.ssh/authorized_keys
+chmod 600 /root/.ssh/authorized_keys
+SSH_KEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPu9GmaW8MVzvyBQ938f3VeMw6hnAgr5aroulK0E66Qp michelecarannante@MICHELECARANNANTE-LAPTOP"
+if ! grep -qF "AAAAC3NzaC1lZDI1NTE5AAAAIPu9GmaW8MVzvyBQ938f3VeMw6hnAgr5aroulK0E66Qp" /root/.ssh/authorized_keys 2>/dev/null; then
+  echo "$SSH_KEY" >> /root/.ssh/authorized_keys
+fi
+
+# 1. FORZA IPv4 SU UBUNTU / NODE / NPM (Evita il blocco "timed out after 30s" su Hostinger!)
+echo "[1/7] Ottimizzazione rete IPv4 per evitare blocchi su registry.npmjs.org..."
+if ! grep -q "^precedence ::ffff:0:0/96  100" /etc/gai.conf 2>/dev/null; then
+  echo "precedence ::ffff:0:0/96  100" >> /etc/gai.conf
+fi
+export NODE_OPTIONS="--dns-result-order=ipv4first --max-old-space-size=3072"
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+
+echo "[2/7] Verifica pacchetti di sistema (curl, git, nginx, certbot)..."
 apt-get update -y
 apt-get install -y curl git ca-certificates gnupg nginx certbot python3-certbot-nginx lsof ufw
 
@@ -35,19 +51,24 @@ if command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active"; then
   ufw allow 'Nginx Full' >/dev/null 2>&1 || true
 fi
 
-echo "[2/7] Verifica Node.js 22 LTS + pnpm..."
+echo "[3/7] Configurazione Node.js + pnpm + PM2 (su IPv4)..."
 if ! command -v node >/dev/null 2>&1 || [ "$(node -v | cut -d. -f1 | tr -d 'v')" -lt 20 ]; then
-  curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+  curl -4 -fsSL https://deb.nodesource.com/setup_22.x | bash -
   apt-get install -y nodejs
 fi
-corepack enable
-corepack prepare pnpm@latest --activate
 
-if ! command -v pm2 >/dev/null 2>&1; then
-  npm install -g pm2
+npm config set prefer-online true || true
+npm config set fetch-retries 5 || true
+npm config set fetch-retry-mintimeout 10000 || true
+
+corepack disable >/dev/null 2>&1 || true
+if ! command -v pnpm >/dev/null 2>&1; then
+  npm install -g pnpm@10 pm2
+else
+  command -v pm2 >/dev/null 2>&1 || npm install -g pm2
 fi
 
-echo "[3/7] Scaricamento codice RistoReel in $APP_DIR..."
+echo "[4/7] Scaricamento codice RistoReel in $APP_DIR..."
 mkdir -p "$APP_DIR"
 if [ -d "$APP_DIR/.git" ]; then
   git -C "$APP_DIR" fetch origin main
@@ -60,10 +81,11 @@ fi
 cd "$APP_DIR"
 mkdir -p .data/mongo .data/media .data/logs
 
-echo "[4/7] Installazione dipendenze Node.js..."
-pnpm install --frozen-lockfile
+echo "[5/7] Installazione dipendenze del progetto con pnpm (IPv4)..."
+pnpm config set network-concurrency 8 || true
+pnpm install --no-frozen-lockfile
 
-echo "[5/7] Configurazione ambiente (.env.local) per $DOMAIN..."
+echo "[6/7] Configurazione ambiente (.env.local) e compilazione (pnpm build)..."
 RESOLVED_IP="$(getent ahostsv4 "$DOMAIN" 2>/dev/null | awk '{print $1; exit}' || true)"
 if [ "$RESOLVED_IP" = "$SERVER_IP" ]; then
   ORIGIN_URL="https://$DOMAIN"
@@ -101,10 +123,9 @@ CRON_SECRET=$CRON_SEC
 EOF
 fi
 
-echo "[6/7] Compilazione di produzione Next.js (pnpm build)..."
 pnpm build
 
-echo "[7/7] Avvio servizi con PM2 (Database MongoDB Replica Set + Simulatore + RistoReel)..."
+echo "[7/7] Avvio servizi con PM2 e configurazione Nginx..."
 cat > "$APP_DIR/ecosystem.config.cjs" <<EOF
 module.exports = {
   apps: [
@@ -114,7 +135,8 @@ module.exports = {
       script: "node_modules/tsx/dist/cli.mjs",
       args: "scripts/dev-mongo.ts",
       env: {
-        NODE_ENV: "development"
+        NODE_ENV: "development",
+        NODE_OPTIONS: "--dns-result-order=ipv4first"
       },
       autorestart: true,
       max_restarts: 20
@@ -126,7 +148,8 @@ module.exports = {
       args: "scripts/mock-higgsfield.ts",
       env: {
         NODE_ENV: "development",
-        MOCK_HF_PORT: "$MOCK_PORT"
+        MOCK_HF_PORT: "$MOCK_PORT",
+        NODE_OPTIONS: "--dns-result-order=ipv4first"
       },
       autorestart: true,
       max_restarts: 20
@@ -138,7 +161,8 @@ module.exports = {
       env: {
         NODE_ENV: "development",
         PORT: "$APP_PORT",
-        HOSTNAME: "0.0.0.0"
+        HOSTNAME: "0.0.0.0",
+        NODE_OPTIONS: "--dns-result-order=ipv4first"
       },
       autorestart: true,
       max_restarts: 20
@@ -150,7 +174,7 @@ EOF
 pm2 delete ristoreel-mongo ristoreel-mock-hf ristoreel-web >/dev/null 2>&1 || true
 pm2 start "$APP_DIR/ecosystem.config.cjs"
 
-echo "Attesa avvio database locale MongoDB su porta $MONGO_PORT (il primo scaricamento richiede ~20-40s)..."
+echo "Attesa avvio database locale MongoDB su porta $MONGO_PORT..."
 for i in $(seq 1 90); do
   if (echo > /dev/tcp/127.0.0.1/$MONGO_PORT) >/dev/null 2>&1; then
     echo "Database MongoDB pronto!"
@@ -159,13 +183,10 @@ for i in $(seq 1 90); do
   sleep 2
 done
 
-echo "Inizializzazione indici e catalogo RistoReel..."
 pnpm db:init --admin=admin@$DOMAIN || true
-
 pm2 save
 env PATH=$PATH:/usr/bin pm2 startup systemd -u root --hp /root >/dev/null 2>&1 || true
 
-echo "Configurazione Nginx per $DOMAIN e www.$DOMAIN..."
 cat > "/etc/nginx/sites-available/$DOMAIN" <<EOF
 server {
     listen 80;
@@ -192,24 +213,16 @@ ln -sf "/etc/nginx/sites-available/$DOMAIN" "/etc/nginx/sites-enabled/$DOMAIN"
 nginx -t
 systemctl reload nginx
 
-echo "Verifica certificato HTTPS Let's Encrypt per $DOMAIN..."
 if [ "$RESOLVED_IP" = "$SERVER_IP" ]; then
-  echo "Il DNS di $DOMAIN punta a $SERVER_IP: attivo subito il certificato SSL HTTPS..."
   if certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --register-unsafely-without-email --redirect; then
     sed -i "s|http://$DOMAIN|https://$DOMAIN|g" "$APP_DIR/.env.local"
     pm2 restart ristoreel-web
   fi
-else
-  echo "NOTA DNS: $DOMAIN non risolve ancora su $SERVER_IP (attuale: '${RESOLVED_IP:-non propagato}')."
-  echo "Appena avrai impostato il record A di $DOMAIN su $SERVER_IP, rilancia questo stesso comando oppure:"
-  echo "  sudo certbot --nginx -d $DOMAIN -d www.$DOMAIN --redirect"
 fi
 
 echo ""
 echo "=================================================================="
 echo "  INSTALLAZIONE RISTOREEL COMPLETATA CON SUCCESSO!"
-echo "  - Dominio principale (quando il DNS e' attivo): http://$DOMAIN"
-echo "  - Accesso diretto immediato tramite IP:         http://$SERVER_IP:$APP_PORT"
-echo "  - Cartella applicazione sul server:             $APP_DIR"
-echo "  - Stato dei servizi in background:              pm2 status"
+echo "  - Apri subito da browser: http://$SERVER_IP:$APP_PORT"
+echo "  - Dominio principale:     http://$DOMAIN"
 echo "=================================================================="
