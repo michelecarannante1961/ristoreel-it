@@ -71,8 +71,15 @@ export const HERO = {
   mark: "/media/hero/songbird.jpg",
 }
 
+export type StepItem = {
+  title: string
+  body: string
+  image: string
+  video?: string
+}
+
 /** "How it works" steps on the generator canvas. */
-export const STEPS = {
+export const STEPS: Record<"video" | "image" | "audio", readonly StepItem[]> = {
   video: [
     {
       title: "Aggiungi i tuoi materiali",
@@ -83,6 +90,7 @@ export const STEPS = {
       title: "Scegli la tua regia",
       body: "Scegli modello, formato e movimento della camera.",
       image: "/media/ristorazione/cucina.jpg",
+      video: "/media/ristorazione/chef-regia.mp4",
     },
     {
       title: "Controlla e genera",
@@ -124,4 +132,4 @@ export const STEPS = {
       image: "/media/ristorazione/piatto.jpg",
     },
   ],
-} as const
+}

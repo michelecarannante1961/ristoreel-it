@@ -80,12 +80,25 @@ export function HowItWorks({
         {steps.map((step, index) => (
           <div key={step.title} className="flex flex-col gap-3 text-left">
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-surface">
-              <img
-                src={step.image}
-                alt=""
-                className="size-full object-cover"
-                loading="lazy"
-              />
+              {step.video ? (
+                <video
+                  src={step.video}
+                  poster={step.image}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="size-full object-cover"
+                />
+              ) : (
+                <img
+                  src={step.image}
+                  alt=""
+                  className="size-full object-cover"
+                  loading="lazy"
+                />
+              )}
               <span className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             </div>
             {centered ? (
