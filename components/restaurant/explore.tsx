@@ -13,6 +13,7 @@ import {
   Sparkles,
   UtensilsCrossed,
 } from "lucide-react"
+import { SoundVideo } from "@/components/media/sound-video"
 import { RESTAURANT_AREAS } from "@/lib/restaurant/catalog"
 import { PURPOSES } from "@/lib/restaurant/brief"
 
@@ -128,15 +129,11 @@ export function RestaurantExplore() {
               className={`risto-story ${item.large ? "risto-story-large" : ""}`}
             >
               {item.video ? (
-                <video
+                <SoundVideo
                   src={item.video}
                   poster={`/media/ristorazione/${item.image}.jpg`}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  aria-label={item.subtitle}
+                  label={item.subtitle}
+                  buttonClassName="absolute right-4 bottom-4"
                 />
               ) : (
                 <img
@@ -241,14 +238,12 @@ export function RestaurantExplore() {
                   href={studioHref(area.id, purpose)}
                 >
                   {area.video ? (
-                    <video
+                    <SoundVideo
                       src={area.video}
                       poster={area.cover}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      preload="metadata"
+                      label={area.title}
+                      compact
+                      buttonClassName="absolute right-2.5 bottom-2.5"
                     />
                   ) : (
                     <img src={area.cover} alt="" loading="lazy" />

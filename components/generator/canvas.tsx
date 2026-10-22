@@ -4,6 +4,7 @@
 import { useMemo, useState } from "react"
 import { BookOpen, FolderClosed, Loader2 } from "lucide-react"
 
+import { SoundVideo } from "@/components/media/sound-video"
 import { useApp } from "@/components/providers/app-providers"
 import { UserGenerations } from "@/components/studio/user-generations"
 import type { GeneratorTab, Surface } from "@/generation/catalog/types"
@@ -81,15 +82,12 @@ export function HowItWorks({
           <div key={step.title} className="flex flex-col gap-3 text-left">
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-surface">
               {step.video ? (
-                <video
+                <SoundVideo
                   src={step.video}
                   poster={step.image}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
+                  label={step.title}
                   className="size-full object-cover"
+                  buttonClassName="absolute right-3 bottom-3"
                 />
               ) : (
                 <img
