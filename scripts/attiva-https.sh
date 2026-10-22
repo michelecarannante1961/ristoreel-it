@@ -67,6 +67,24 @@ if [ -f "$APP_DIR/.env.local" ]; then
   fi
 fi
 
+# Pulizia automatica tentativi falliti o interrotti dalle generazioni precedenti
+if [ -f "$APP_DIR/.env.local" ]; then
+  node -e '
+    const fs = require("fs");
+    const { MongoClient } = require("mongodb");
+    const envContent = fs.readFileSync("/var/www/ristoreel.it/.env.local", "utf8");
+    const match = envContent.match(/^MONGODB_URI=(.+)$/m);
+    const uri = match ? match[1].trim() : "mongodb://127.0.0.1:27017/ristoreel";
+    const client = new MongoClient(uri);
+    client.connect().then(async () => {
+      const db = client.db();
+      const r = await db.collection("generations").deleteMany({ status: { $in: ["failed", "canceled", "pending_submit", "queued"] } });
+      console.log("Pulizia MongoDB: rimossi " + r.deletedCount + " record falliti/interrotti.");
+      await client.close();
+    }).catch(e => console.log("Cleanup notice:", e.message));
+  ' 2>/dev/null || true
+fi
+
 cd "$APP_DIR"
 export NODE_OPTIONS="--dns-result-order=ipv4first --max-old-space-size=3072"
 pnpm build

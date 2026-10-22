@@ -289,6 +289,37 @@ export function LibraryView({
           ) : null}
         </header>
 
+        {runs.records.filter((r) => r.status !== "completed").length > 0 && !selecting ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-white">
+            <div className="flex items-center gap-2">
+              <span className="flex size-6 items-center justify-center rounded-full bg-red-500/20 text-red-400">
+                <Trash2 className="size-3.5" />
+              </span>
+              <span>
+                <strong>{runs.records.filter((r) => r.status !== "completed").length} tentativi precedenti non riusciti</strong> (i box grigi delle prove interrotte).
+              </span>
+            </div>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={async () => {
+                const failed = runs.records.filter((r) => r.status !== "completed")
+                setBusy(true)
+                const ok = await runs.remove(failed.map((r) => r.id))
+                setBusy(false)
+                if (ok) {
+                  toast.success("Box grigi rimossi con successo!")
+                  router.refresh()
+                }
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-red-500/80 hover:bg-red-500 px-3 py-1.5 font-semibold text-white transition-colors"
+            >
+              <Trash2 className="size-3.5" />
+              Elimina {runs.records.filter((r) => r.status !== "completed").length} box grigi
+            </button>
+          </div>
+        ) : null}
+
         {selecting ? (
           <div
             className="flex flex-wrap items-center gap-2 rounded-xl bg-surface p-2"

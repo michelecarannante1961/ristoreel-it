@@ -9,6 +9,7 @@ import {
   Pause,
   Play,
   ShieldAlert,
+  Trash2,
   TriangleAlert,
 } from "lucide-react"
 
@@ -87,7 +88,13 @@ function GeneratingTile({ item }: { item: GalleryItem }) {
   )
 }
 
-function FailedTile({ item }: { item: GalleryItem }) {
+function FailedTile({
+  item,
+  onDelete,
+}: {
+  item: GalleryItem
+  onDelete?: () => void
+}) {
   const blocked = item.failureKind === "nsfw"
   const Icon = blocked ? ShieldAlert : TriangleAlert
   return (
@@ -106,14 +113,26 @@ function FailedTile({ item }: { item: GalleryItem }) {
       </span>
       <span className="text-sm font-semibold text-foreground">
         {blocked
-          ? "Blocked by content filter"
+          ? "Bloccato dal filtro"
           : item.failureKind === "canceled"
-            ? "Canceled"
-            : "Generation failed"}
+            ? "Annullato"
+            : "Tentativo non riuscito"}
       </span>
-      <span className="line-clamp-3 max-w-[260px] text-xs text-muted-foreground">
+      <span className="line-clamp-2 max-w-[260px] text-xs text-muted-foreground">
         {item.failureLabel}
       </span>
+      {onDelete ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete()
+          }}
+          className="mt-1 inline-flex items-center gap-1 rounded-lg bg-red-500/20 px-2.5 py-1 text-xs font-semibold text-red-300 hover:bg-red-500/30 transition-colors"
+        >
+          <Trash2 className="size-3" /> Rimuovi
+        </button>
+      ) : null}
     </span>
   )
 }
@@ -252,12 +271,13 @@ function GalleryTileComponent({
   )
 
   if (item.status !== "ready") {
+    const deleteAction = itemActions.find((a) => a.id === "delete")
     return (
       <div className="studio-tile group" style={style}>
         {item.status === "generating" ? (
           <GeneratingTile item={item} />
         ) : (
-          <FailedTile item={item} />
+          <FailedTile item={item} onDelete={deleteAction?.onSelect} />
         )}
         {itemActions.length ? <CardActions actions={itemActions} /> : null}
       </div>

@@ -106,6 +106,7 @@ export function useTileActions({
                 } satisfies TileAction,
               ]
             : []),
+          remove,
         ]
       }
       if (item.status === "failed") return [reuseAction, remove]
