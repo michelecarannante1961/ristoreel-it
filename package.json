@@ -19,6 +19,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "models": "node scripts/sync-models.mjs",
+    "stripe:setup": "tsx scripts/setup-stripe.ts",
     "db:init": "tsx --conditions=react-server scripts/db-init.ts",
     "pricing:sync": "tsx --conditions=react-server scripts/sync-pricing.ts",
     "mock:higgsfield": "tsx scripts/mock-higgsfield.ts",
